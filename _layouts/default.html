@@ -1,0 +1,16 @@
+{%- assign timestamp = site.time | date:'%Y%m%d%I%M%S%L' -%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<title>pdv</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<link rel="stylesheet" type="text/css" href="{{ 'assets/css/styles.css?v=' | append: timestamp | relative_url }}" />
+	<script src="{{ 'assets/js/script.js?v=' | append: timestamp | relative_url }}"></script>
+</head>
+<body>
+	<div class="wrapper">
+	{{ content }}
+	</div>
+</body>
+</html>

@@ -1,0 +1,9 @@
+permalink: /:title/
+
+plugins:
+  - jekyll-mentions
+
+exclude: [vendor, "Gemfile", "Gemfile.lock", "CONTRIBUTING.md", "LICENSE", "README.md"]
+include: ["_js", "samples"]
+
+incremental: true
