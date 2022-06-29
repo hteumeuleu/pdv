@@ -16,6 +16,7 @@
 #source {
 	width: rem(400px);
 	height: rem(240px);
+	background-color: $black;
 }
 
 #source {
@@ -23,4 +24,9 @@
 	position: absolute;
 	right: 0;
 	top: 0;
+	object-fit: cover;
+}
+
+#preview {
+	opacity: 0.8;
 }

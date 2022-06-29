@@ -12,12 +12,15 @@ layout: default
 	<div>
 		<span>Scale to fit</span>
 		<div>
-			<input type="radio" name="scale" id="input-scale-inside" />
+			<input type="radio" name="scale" value="inside" id="input-scale-inside" />
 			<label for="input-scale-inside">inside</label>
 		</div>
 		<div>
-			<input type="radio" name="scale" id="input-scale-outside" />
+			<input type="radio" name="scale" value="outside" id="input-scale-outside" checked />
 			<label for="input-scale-outside">outside</label>
 		</div>
+	</div>
+	<div>
+		<a id="output" href="#" download="export.pdv">Export .pdv</a>
 	</div>
 </form>
