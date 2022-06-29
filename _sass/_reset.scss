@@ -18,3 +18,7 @@ code {
 	line-height: 1;
 	font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
 }
+
+input, button, textarea, select {
+	accent-color: $purple;
+}

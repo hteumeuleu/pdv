@@ -5,3 +5,19 @@ layout: default
 	<canvas id="preview" width="400" height="240"></canvas>
 </div>
 <video id="source" src="samples/sample.mov" width="400" height="240" controls muted hidden></video>
+<form method="post">
+	<div>
+		<input type="file" accept="video/*" />
+	</div>
+	<div>
+		<span>Scale to fit</span>
+		<div>
+			<input type="radio" name="scale" id="input-scale-inside" />
+			<label for="input-scale-inside">inside</label>
+		</div>
+		<div>
+			<input type="radio" name="scale" id="input-scale-outside" />
+			<label for="input-scale-outside">outside</label>
+		</div>
+	</div>
+</form>

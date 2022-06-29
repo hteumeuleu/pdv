@@ -3,6 +3,9 @@ layout: null
 permalink: "/assets/js/script.js"
 ---
 document.addEventListener('DOMContentLoaded', e => {
+	//
+	// Basic canvas
+	//
 	const video = document.querySelector('#source');
 	const canvas = document.querySelector('#preview');
 	const ctx = canvas.getContext('2d');
@@ -45,4 +48,18 @@ document.addEventListener('DOMContentLoaded', e => {
 		ctx.putImageData(frame, 0, 0);
 
 	}
+
+	//
+	// Input management
+	//
+	const input = document.querySelector('input[type="file"]');
+	input.addEventListener('change', e => {
+		if (input.files.length) {
+			video.src = URL.createObjectURL(input.files[0]);
+			video.onload = function() {
+				URL.revokeObjectURL(video.src);
+				computeFrame();
+			}
+		}
+	});
 })
