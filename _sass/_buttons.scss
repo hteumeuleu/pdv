@@ -1,0 +1,16 @@
+button,
+.button,
+input::file-selector-button {
+	display: inline-flex;
+	padding: rem(8px) rem(16px);
+	color: $white;
+	background-color: $purple;
+	border-radius: rem(24px);
+	border: none;
+	appearance: none;
+	cursor: pointer;
+	font-family: inherit;
+	font-size: inherit;
+	font-weight: inherit;
+	text-decoration: none;
+}

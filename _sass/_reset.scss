@@ -21,4 +21,7 @@ code {
 
 input, button, textarea, select {
 	accent-color: $purple;
+	font-family: inherit;
+	font-size: inherit;
+	font-weight: inherit;
 }

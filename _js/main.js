@@ -127,7 +127,36 @@ document.addEventListener('DOMContentLoaded', e => {
 	//
 	// Output download
 	//
-	const debug = {coucou: "monde"};
-	const blob = new Blob([JSON.stringify(debug, null, 2)], {type : 'application/json'});
+	// Ident
+	const identString = "Playdate VID"
+	let ident = new Uint8Array(16);
+	ident.set(identString.split("").map(x => x.charCodeAt()));
+
+	// Number of frames
+	let numFrames = new Uint16Array(1);
+	numFrames[0] = 30;
+
+	// Reserved, always 0
+	let reserved = new Uint16Array(1);
+
+	// Framerate
+	let framerate = new Float32Array(1);
+	framerate[0] = 30;
+
+	// Frame width
+	let framewidth = new Uint16Array(1);
+	framewidth[0] = width;
+
+	// Frame height
+	let frameheight = new Uint16Array(1);
+	frameheight[0] = height;
+
+	// Frame Table
+
+	const blob = new Blob([ident, numFrames, reserved, framerate, framewidth, frameheight], {type : 'application/octet-stream'});
 	output.href = URL.createObjectURL(blob);
+	URL.revokeObjectURL(blob);
+
+	const textarea = document.querySelector('#textarea');
+	blob.text().then(value => { textarea.value = value })
 })
