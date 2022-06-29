@@ -75,15 +75,17 @@ document.addEventListener('DOMContentLoaded', e => {
 		const frame = ctx.getImageData(0, 0, width, height);
 		const length = frame.data.length;
 		const data = frame.data;
+		let previousError = 0;
 		for (let i = 0; i < length; i += 4) {
 			const red = data[i + 0];
 			const green = data[i + 1];
 			const blue = data[i + 2];
-			const avg = (red + green + blue) / 3;
+			const avg = (red + green + blue) / 3 + previousError;
 			let newValue = 0;
 			if(avg > threshold) {
 				newValue = 255;
 			}
+			previousError = avg - newValue;
 			data[i + 0] = newValue;
 			data[i + 1] = newValue;
 			data[i + 2] = newValue;
