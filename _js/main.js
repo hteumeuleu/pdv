@@ -161,4 +161,35 @@ document.addEventListener('DOMContentLoaded', e => {
 
 	const textarea = document.querySelector('#textarea');
 	blob.text().then(value => { textarea.value = value })
+
+	// Calling Netlify functions: pdv.js
+	const message = JSON.stringify({
+		width: 400,
+		height: 240,
+		framerate: 30,
+		frames: [
+			[0,0,0,0],
+			[1,1,1,1],
+			[0,1,0,1],
+			[1,0,1,0],
+		]
+	});
+	const endpoint = "/.netlify/functions/pdv";
+	fetch(endpoint, {
+		method: 'POST',
+		body: message
+	})
+	.then(response => response.json())
+	.then(data => {
+		console.log('Success:', data);
+		textarea.value = textarea.value + "\n\n" + data.buffer;
+		const encoder = new TextEncoder();
+		const view = encoder.encode(data.buffer);
+		const responseBlob = new Blob([view], {type : 'application/octet-stream'});
+		output.href = URL.createObjectURL(responseBlob);
+		URL.revokeObjectURL(responseBlob);
+	})
+	.catch((error) => {
+	  console.error('Error:', error);
+	});
 })
