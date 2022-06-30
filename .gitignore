@@ -4,4 +4,5 @@ _site
 .jekyll-metadata
 vendor
 .DS_Store
-samples/
+samples/*
+!samples/sample.mp4
