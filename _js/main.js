@@ -159,16 +159,29 @@ document.addEventListener('DOMContentLoaded', e => {
 	const textarea = document.querySelector('#textarea');
 	blob.text().then(value => { textarea.value = value })
 
+	function serializeFrame() {
+		const frame = ctx.getImageData(0, 0, width, height);
+		const data = frame.data;
+		let newDataArray = new Array();
+		data.forEach((e, i) => {
+			// console.log(e, i);
+			let value = 0;
+			if(e === 255) {
+				value = 1;
+			}
+			newDataArray.push(value);
+		});
+		return newDataArray;
+	}
+
 	// Calling Netlify functions: pdv.js
+	const aSingleFrame = serializeFrame();
 	const message = JSON.stringify({
 		width: 400,
 		height: 240,
 		framerate: 30,
 		frames: [
-			[0,0,0,0],
-			[1,1,1,1],
-			[0,1,0,1],
-			[1,0,1,0],
+			aSingleFrame
 		]
 	});
 	const endpoint = "/.netlify/functions/pdv";
