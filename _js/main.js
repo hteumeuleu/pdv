@@ -45,31 +45,24 @@ document.addEventListener('DOMContentLoaded', e => {
 	const computeFrame = function() {
 		ctx.fillStyle = '#000'
 		ctx.fillRect(0, 0, width, height);
-		let sx, sy, sWidth, sHeight;
-		if (scale == "inside") {
-			if(video.videoWidth < video.videoHeight) { // Portrait
-				sWidth = Math.round(width * video.videoHeight / height);
-				sHeight = video.videoHeight;
-				sx = Math.round((sWidth - video.videoWidth) / 2) * -1;
-				sy = 0; 
-			} else { // Landscape
-				sWidth = video.videoWidth;
-				sHeight = Math.round(height * video.videoWidth / width);
-				sx = 0;
-				sy = Math.round((video.videoHeight - sHeight) / 2);
-			}
+		let sx, sy, sWidth, sHeight, videoRatio, playdateRatio, portrait, biggerRatio;
+		playdateRatio = width / height;
+		videoRatio = video.videoWidth / video.videoHeight;
+		portrait = video.videoWidth < video.videoHeight;
+		biggerRatio = videoRatio > playdateRatio;
+		if(scale == "outside" && !portrait && !biggerRatio
+			|| scale == "inside" && !portrait && biggerRatio
+			|| scale == "outside" && portrait && !biggerRatio
+			|| scale == "inside" && portrait && biggerRatio) {
+			sWidth = video.videoWidth;
+			sHeight = Math.round(height * video.videoWidth / width);
+			sx = 0;
+			sy = Math.round((video.videoHeight - sHeight) / 2);
 		} else {
-			if(video.videoWidth < video.videoHeight) { // Portrait
-				sWidth = video.videoWidth;
-				sHeight = Math.round(height * video.videoWidth / width);
-				sx = 0;
-				sy = Math.round((video.videoHeight - sHeight) / 2);
-			} else { // Landscape
-				sWidth = Math.round(width * video.videoHeight / height);
-				sHeight = video.videoHeight;
-				sx = Math.round((sWidth - video.videoWidth) / 2) * -1;
-				sy = 0; 
-			}
+			sWidth = Math.round(width * video.videoHeight / height);
+			sHeight = video.videoHeight;
+			sx = Math.round((sWidth - video.videoWidth) / 2) * -1;
+			sy = 0; 
 		}
 		ctx.drawImage(video, sx, sy, sWidth, sHeight, 0, 0, width, height);
 		const frame = ctx.getImageData(0, 0, width, height);
