@@ -68,6 +68,7 @@ document.addEventListener('DOMContentLoaded', e => {
 		const frame = ctx.getImageData(0, 0, width, height);
 		const length = frame.data.length;
 		const data = frame.data;
+		let newData = new Uint8ClampedArray(length);
 		let previousError = 0;
 		for (let i = 0; i < length; i += 4) {
 			const red = data[i + 0];
@@ -79,13 +80,16 @@ document.addEventListener('DOMContentLoaded', e => {
 				newValue = 255;
 			}
 			previousError = avg - newValue;
-			data[i + 0] = newValue;
-			data[i + 1] = newValue;
-			data[i + 2] = newValue;
+			newData[i + 0] = newValue;
+			newData[i + 1] = newValue;
+			newData[i + 2] = newValue;
+			newData[i + 3] = 255;
 		}
-		ctx.fillStyle = '#000'
+		ctx.fillStyle = '#000';
 		ctx.fillRect(0, 0, width, height);
-		ctx.putImageData(frame, 0, 0);
+		let newFrame = ctx.createImageData(width, height);
+		newFrame.data.set(newData);
+		ctx.putImageData(newFrame, 0, 0);
 	}
 
 	//
