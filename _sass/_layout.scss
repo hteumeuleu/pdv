@@ -1,13 +1,14 @@
 .wrapper {
-	max-width: rem(640px);
+	max-width: rem(672px);
 	margin: auto;
+	padding: rem(16px);
 }
 
 .screen {
 	position: relative;
-	margin: rem(32px) 0;
-	width: rem(400px);
-	height: rem(240px);
+	margin: 0 0 rem(16px);
+	max-width: rem(400px);
+	width: calc(100% - #{rem(48px)});
 	background-color: $grey;
 	border: rem(24px) solid $black;
 	border-radius: rem(16px);
@@ -16,8 +17,9 @@
 
 #preview,
 #source {
-	width: rem(400px);
-	height: rem(240px);
+	width: 100%;
+	height: auto;
+	aspect-ratio: 400 / 240;
 	background-color: $black;
 }
 
@@ -36,5 +38,6 @@
 }
 
 #preview {
+	display: block;
 	opacity: 0.8;
 }
