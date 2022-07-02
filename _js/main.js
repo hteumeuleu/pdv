@@ -45,26 +45,46 @@ document.addEventListener('DOMContentLoaded', e => {
 	const computeFrame = function() {
 		ctx.fillStyle = '#000'
 		ctx.fillRect(0, 0, width, height);
-		let sx, sy, sWidth, sHeight, videoRatio, playdateRatio, portrait, biggerRatio;
-		playdateRatio = width / height;
-		videoRatio = video.videoWidth / video.videoHeight;
-		portrait = video.videoWidth < video.videoHeight;
-		biggerRatio = videoRatio > playdateRatio;
-		if(scale == "outside" && !portrait && !biggerRatio
-			|| scale == "inside" && !portrait && biggerRatio
-			|| scale == "outside" && portrait && !biggerRatio
-			|| scale == "inside" && portrait && biggerRatio) {
-			sWidth = video.videoWidth;
-			sHeight = Math.round(height * video.videoWidth / width);
+		let dWidth, dHeight, dx, dy, sx, sy, sWidth, sHeight;
+		const playdateRatio = width / height;
+		const videoRatio = video.videoWidth / video.videoHeight;
+		const biggerRatio = videoRatio > playdateRatio;
+		if(scale == "inside") {
+			// Source
 			sx = 0;
-			sy = Math.round((video.videoHeight - sHeight) / 2);
-		} else {
-			sWidth = Math.round(width * video.videoHeight / height);
+			sy = 0;
+			sWidth = video.videoWidth;
 			sHeight = video.videoHeight;
-			sx = Math.round((sWidth - video.videoWidth) / 2) * -1;
-			sy = 0; 
+			// Destination
+			if(!biggerRatio) {
+				dWidth = Math.round(sWidth * height / sHeight);
+				dHeight = height;
+			} else {
+				dWidth = width;
+				dHeight = Math.round(sHeight * width / sWidth);
+			}
+			dx = Math.round((width - dWidth) / 2);
+			dy = Math.round((height - dHeight) / 2);
+		} else {
+			// Source
+			if(!biggerRatio) {
+				sWidth = video.videoWidth;
+				sHeight = Math.round(height * video.videoWidth / width);
+				sx = 0;
+				sy = Math.round((video.videoHeight - sHeight) / 2);
+			} else {
+				sWidth = Math.round(width * video.videoHeight / height);
+				sHeight = video.videoHeight;
+				sx = Math.round((sWidth - video.videoWidth) / 2) * -1;
+				sy = 0;
+			}
+			// Destination
+			dx = 0;
+			dy = 0;
+			dWidth = 400;
+			dHeight = 240;
 		}
-		ctx.drawImage(video, sx, sy, sWidth, sHeight, 0, 0, width, height);
+		ctx.drawImage(video, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
 		const frame = ctx.getImageData(0, 0, width, height);
 		const length = frame.data.length;
 		const data = frame.data;
@@ -120,7 +140,9 @@ document.addEventListener('DOMContentLoaded', e => {
 			scale = "outside";
 			video.style.objectFit = "cover";
 		}
-		computeFrame();
+		if(video.readyState > 1) {
+			computeFrame();
+		}
 	}
 
 	//
