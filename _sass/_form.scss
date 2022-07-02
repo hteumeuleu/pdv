@@ -1,0 +1,7 @@
+input[type="file"] {
+	max-width: calc(100vw - #{rem(32px)});
+}
+
+form > div:not(:last-child) {
+	margin-bottom: rem(8px);
+}
