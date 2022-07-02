@@ -10,6 +10,25 @@ layout: default
 		<input type="file" accept="video/*" />
 	</div>
 	<div>
+		<label for="select-dither">Dither</label>
+		<select id="select-dither">
+			<option value="threshold">Threshold</option>
+			<option value="basic" selected>Basic error</option>
+			<option value="xxxxx" disabled>Bayer 2&times;2</option>
+			<option value="xxxxx" disabled>Bayer 4&times;4</option>
+			<option value="xxxxx" disabled>Bayer 8&times;8</option>
+			<option value="xxxxx" disabled>Blue Pattern</option>
+			<option value="floydsteinberg">Floyd-Steinberg</option>
+			<option value="xxxxx" disabled>Jarvis-Judice-Ninke</option>
+			<option value="xxxxx" disabled>Stucki</option>
+			<option value="xxxxx" disabled>Atkinson</option>
+			<option value="xxxxx" disabled>Burkes</option>
+			<option value="xxxxx" disabled>Sierra</option>
+			<option value="xxxxx" disabled>Two-Row Sierra</option>
+			<option value="xxxxx" disabled>Sierra Lite</option>
+		</select>
+	</div>
+	<div>
 		<span>Scale to fit</span>
 		<div>
 			<input type="radio" name="scale" value="inside" id="input-scale-inside" />

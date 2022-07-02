@@ -88,6 +88,99 @@ document.addEventListener('DOMContentLoaded', e => {
 		const frame = ctx.getImageData(0, 0, width, height);
 		const length = frame.data.length;
 		const data = frame.data;
+		let newData = filter(data);
+		ctx.fillStyle = '#000';
+		ctx.fillRect(0, 0, width, height);
+		let newFrame = ctx.createImageData(width, height);
+		newFrame.data.set(newData);
+		ctx.putImageData(newFrame, 0, 0);
+	}
+
+	//
+	// Dither Management
+	//
+	const select = document.querySelector('#select-dither')
+	select.addEventListener('change', e => {
+		if(video.readyState > 1) {
+			computeFrame();
+		}
+	});
+
+	function filter(data) {
+		const selected = select.options[select.selectedIndex].value;
+		if(selected == "basic") {
+			return filterThresholdWithBasicError(data);
+		} else if(selected == "floydsteinberg") {
+			return filterFloydSteinberg(data);
+		} else {
+			return filterThreshold(data);
+		}
+	}
+
+	function filterFloydSteinberg(data) {
+		const length = data.length;
+		let newData = new Uint8ClampedArray(length);
+		let previousError, nextRowErrorArray;
+
+		for (let i = 0; i < length; i += 4) {
+			let col = i % (width * 4);
+			let row = i % col;
+
+			if(row == 0) {
+				previousError = 0;
+				nextRowErrorArray = new Uint8ClampedArray(width);
+			}
+			const red = data[i + 0];
+			const green = data[i + 1];
+			const blue = data[i + 2];
+			const avg = (red + green + blue) / 3 + previousError;
+
+			if(row > 0) {
+				avg += nextRowErrorArray(col);
+			}
+
+			let newValue = 0;
+			if(avg > threshold) {
+				newValue = 255;
+			}
+			let error = avg - newValue;
+
+			let j = i % (width * 4);
+			if(i > (width * 4)) {
+				error += nextRowErrorArray(j);
+			}
+			let errorShare = error / 16;
+			previousError = Math.round(errorShare*7);
+
+			newData[i + 0] = newValue;
+			newData[i + 1] = newValue;
+			newData[i + 2] = newValue;
+			newData[i + 3] = 255;
+		}
+	}
+
+	function filterThreshold(data) {
+		const length = data.length;
+		let newData = new Uint8ClampedArray(length);
+		for (let i = 0; i < length; i += 4) {
+			const red = data[i + 0];
+			const green = data[i + 1];
+			const blue = data[i + 2];
+			const avg = (red + green + blue) / 3;
+			let newValue = 0;
+			if(avg > threshold) {
+				newValue = 255;
+			}
+			newData[i + 0] = newValue;
+			newData[i + 1] = newValue;
+			newData[i + 2] = newValue;
+			newData[i + 3] = 255;
+		}
+		return newData;
+	}
+
+	function filterThresholdWithBasicError(data) {
+		const length = data.length;
 		let newData = new Uint8ClampedArray(length);
 		let previousError = 0;
 		for (let i = 0; i < length; i += 4) {
@@ -100,16 +193,15 @@ document.addEventListener('DOMContentLoaded', e => {
 				newValue = 255;
 			}
 			previousError = avg - newValue;
+			if(i % width == 0) {
+				previousError = 0;
+			}
 			newData[i + 0] = newValue;
 			newData[i + 1] = newValue;
 			newData[i + 2] = newValue;
 			newData[i + 3] = 255;
 		}
-		ctx.fillStyle = '#000';
-		ctx.fillRect(0, 0, width, height);
-		let newFrame = ctx.createImageData(width, height);
-		newFrame.data.set(newData);
-		ctx.putImageData(newFrame, 0, 0);
+		return newData;
 	}
 
 	//
