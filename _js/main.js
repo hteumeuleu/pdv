@@ -114,9 +114,73 @@ document.addEventListener('DOMContentLoaded', e => {
 			return filterFloydSteinberg(data);
 		} else if(selected == "stucki") {
 			return filterStucki(data);
+		} else if(selected == "atkinson") {
+			return filterAtkinson(data);
 		} else {
 			return filterThreshold(data);
 		}
+	}
+
+	function filterAtkinson(data) {
+		const length = data.length;
+		let newData = new Uint8ClampedArray(length);
+
+		for (let i = 0; i < length; i += 4) {
+			const col = Math.round(i % (width * 4) / 4);
+			const row = Math.round(i / (width * 4));
+
+			const red = data[i + 0];
+			const green = data[i + 1];
+			const blue = data[i + 2];
+			const avg = (red + green + blue) / 3;
+
+			let newValue = 0;
+			if(avg > threshold) {
+				newValue = 255;
+			}
+
+
+	// 	   X   1   1 
+  //   1   1   1
+  //       1
+
+  //     (1/8)
+
+			const error = avg - newValue;
+			const errorShare = error / 8;
+			if(col < width - 2) {
+				data[i + 4] += errorShare*1;
+				data[i + 5] += errorShare*1;
+				data[i + 6] += errorShare*1;
+				data[i + 8] += errorShare*1;
+				data[i + 9] += errorShare*1;
+				data[i + 10] += errorShare*1;
+			}
+			if(row < height - 2) {
+				if(col >= 1) {
+					data[i - 4 + (width * 4)] += errorShare*1;
+					data[i - 3 + (width * 4)] += errorShare*1;
+					data[i - 2 + (width * 4)] += errorShare*1;
+				}
+				data[i + 0 + (width * 4)] += errorShare*1;
+				data[i + 1 + (width * 4)] += errorShare*1;
+				data[i + 2 + (width * 4)] += errorShare*1;
+				data[i + 0 + (width * 4 * 2)] += errorShare*1;
+				data[i + 1 + (width * 4 * 2)] += errorShare*1;
+				data[i + 2 + (width * 4 * 2)] += errorShare*1;
+				if(col < width - 1) {
+					data[i + 4 + (width * 4)] += errorShare*1;
+					data[i + 5 + (width * 4)] += errorShare*1;
+					data[i + 6 + (width * 4)] += errorShare*1;
+				}
+			}
+
+			newData[i + 0] = newValue;
+			newData[i + 1] = newValue;
+			newData[i + 2] = newValue;
+			newData[i + 3] = 255;
+		}
+		return newData;
 	}
 
 	function filterStucki(data) {
