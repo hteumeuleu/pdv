@@ -120,43 +120,49 @@ document.addEventListener('DOMContentLoaded', e => {
 	function filterFloydSteinberg(data) {
 		const length = data.length;
 		let newData = new Uint8ClampedArray(length);
-		let previousError, nextRowErrorArray;
 
 		for (let i = 0; i < length; i += 4) {
-			let col = i % (width * 4);
-			let row = i % col;
+			const col = Math.round(i % (width * 4) / 4);
+			const row = Math.round(i / (width * 4));
 
-			if(row == 0) {
-				previousError = 0;
-				nextRowErrorArray = new Uint8ClampedArray(width);
-			}
 			const red = data[i + 0];
 			const green = data[i + 1];
 			const blue = data[i + 2];
-			const avg = (red + green + blue) / 3 + previousError;
-
-			if(row > 0) {
-				avg += nextRowErrorArray(col);
-			}
+			const avg = (red + green + blue) / 3;
 
 			let newValue = 0;
 			if(avg > threshold) {
 				newValue = 255;
 			}
-			let error = avg - newValue;
-
-			let j = i % (width * 4);
-			if(i > (width * 4)) {
-				error += nextRowErrorArray(j);
+			const error = avg - newValue;
+			const errorShare = error / 16;
+			if(col < width - 1) {
+				data[i + 4] += errorShare*7;
+				data[i + 5] += errorShare*7;
+				data[i + 6] += errorShare*7;
 			}
-			let errorShare = error / 16;
-			previousError = Math.round(errorShare*7);
+			if(row < height - 1) {
+				if(col > 0) {
+					data[i - 4 + (width * 4)] += errorShare*3;
+					data[i - 3 + (width * 4)] += errorShare*3;
+					data[i - 2 + (width * 4)] += errorShare*3;
+				}
+				data[i + 0 + (width * 4)] += errorShare*5;
+				data[i + 1 + (width * 4)] += errorShare*5;
+				data[i + 2 + (width * 4)] += errorShare*5;
+				if(col < width - 1) {
+					data[i + 4 + (width * 4)] += errorShare*1;
+					data[i + 5 + (width * 4)] += errorShare*1;
+					data[i + 6 + (width * 4)] += errorShare*1;
+				}
+			}
 
 			newData[i + 0] = newValue;
 			newData[i + 1] = newValue;
 			newData[i + 2] = newValue;
 			newData[i + 3] = 255;
 		}
+		return newData;
 	}
 
 	function filterThreshold(data) {
@@ -298,22 +304,22 @@ document.addEventListener('DOMContentLoaded', e => {
 			aSingleFrame
 		]
 	});
-	const endpoint = "/.netlify/functions/pdv";
-	fetch(endpoint, {
-		method: 'POST',
-		body: message
-	})
-	.then(response => response.json())
-	.then(data => {
-		console.log('Success:', data);
-		textarea.value = textarea.value + "\n\n" + data.buffer;
-		const encoder = new TextEncoder();
-		const view = encoder.encode(data.buffer);
-		const responseBlob = new Blob([view], {type : 'application/octet-stream'});
-		output.href = URL.createObjectURL(responseBlob);
-		URL.revokeObjectURL(responseBlob);
-	})
-	.catch((error) => {
-	  console.error('Error:', error);
-	});
+	// const endpoint = "/.netlify/functions/pdv";
+	// fetch(endpoint, {
+	// 	method: 'POST',
+	// 	body: message
+	// })
+	// .then(response => response.json())
+	// .then(data => {
+	// 	console.log('Success:', data);
+	// 	textarea.value = textarea.value + "\n\n" + data.buffer;
+	// 	const encoder = new TextEncoder();
+	// 	const view = encoder.encode(data.buffer);
+	// 	const responseBlob = new Blob([view], {type : 'application/octet-stream'});
+	// 	output.href = URL.createObjectURL(responseBlob);
+	// 	URL.revokeObjectURL(responseBlob);
+	// })
+	// .catch((error) => {
+	//   console.error('Error:', error);
+	// });
 })
