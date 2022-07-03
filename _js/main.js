@@ -112,9 +112,86 @@ document.addEventListener('DOMContentLoaded', e => {
 			return filterThresholdWithBasicError(data);
 		} else if(selected == "floydsteinberg") {
 			return filterFloydSteinberg(data);
+		} else if(selected == "stucki") {
+			return filterStucki(data);
 		} else {
 			return filterThreshold(data);
 		}
+	}
+
+	function filterStucki(data) {
+		const length = data.length;
+		let newData = new Uint8ClampedArray(length);
+
+		for (let i = 0; i < length; i += 4) {
+			const col = Math.round(i % (width * 4) / 4);
+			const row = Math.round(i / (width * 4));
+
+			const red = data[i + 0];
+			const green = data[i + 1];
+			const blue = data[i + 2];
+			const avg = (red + green + blue) / 3;
+
+			let newValue = 0;
+			if(avg > threshold) {
+				newValue = 255;
+			}
+
+			const error = avg - newValue;
+			const errorShare = error / 42;
+			if(col < width - 2) {
+				data[i + 4] += errorShare*8;
+				data[i + 5] += errorShare*8;
+				data[i + 6] += errorShare*8;
+				data[i + 8] += errorShare*4;
+				data[i + 9] += errorShare*4;
+				data[i + 10] += errorShare*4;
+			}
+			if(row < height - 2) {
+				if(col >= 2) {
+					data[i - 4 + (width * 4)] += errorShare*4;
+					data[i - 3 + (width * 4)] += errorShare*4;
+					data[i - 2 + (width * 4)] += errorShare*4;
+					data[i - 8 + (width * 4)] += errorShare*2;
+					data[i - 7 + (width * 4)] += errorShare*2;
+					data[i - 6 + (width * 4)] += errorShare*2;
+
+					data[i - 4 + (width * 4 * 2)] += errorShare*2;
+					data[i - 3 + (width * 4 * 2)] += errorShare*2;
+					data[i - 2 + (width * 4 * 2)] += errorShare*2;
+					data[i - 8 + (width * 4 * 2)] += errorShare*1;
+					data[i - 7 + (width * 4 * 2)] += errorShare*1;
+					data[i - 6 + (width * 4 * 2)] += errorShare*1;
+				}
+				data[i + 0 + (width * 4)] += errorShare*8;
+				data[i + 1 + (width * 4)] += errorShare*8;
+				data[i + 2 + (width * 4)] += errorShare*8;
+				data[i + 0 + (width * 4 * 2)] += errorShare*4;
+				data[i + 1 + (width * 4 * 2)] += errorShare*4;
+				data[i + 2 + (width * 4 * 2)] += errorShare*4;
+				if(col < width - 2) {
+					data[i + 4 + (width * 4)] += errorShare*4;
+					data[i + 5 + (width * 4)] += errorShare*4;
+					data[i + 6 + (width * 4)] += errorShare*4;
+					data[i + 8 + (width * 4)] += errorShare*2;
+					data[i + 9 + (width * 4)] += errorShare*2;
+					data[i + 10 + (width * 4)] += errorShare*2;
+
+					data[i + 4 + (width * 4 * 2)] += errorShare*1;
+					data[i + 5 + (width * 4 * 2)] += errorShare*1;
+					data[i + 6 + (width * 4 * 2)] += errorShare*1;
+					data[i + 8 + (width * 4 * 2)] += errorShare*1;
+					data[i + 9 + (width * 4 * 2)] += errorShare*1;
+					data[i + 10 + (width * 4 * 2)] += errorShare*1;
+				}
+			}
+
+			newData[i + 0] = newValue;
+			newData[i + 1] = newValue;
+			newData[i + 2] = newValue;
+			newData[i + 3] = 255;
+		}
+		return newData;
 	}
 
 	function filterFloydSteinberg(data) {
