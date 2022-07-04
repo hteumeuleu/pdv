@@ -7,10 +7,14 @@ class pdvPreview {
 		this.height = 240;
 		this.scale = "outside";
 		this.filterThreshold = 127;
+		this.filter = "atkinson";
 
 		if(this.canvas && this.video) {
 			this.ctx = this.canvas.getContext('2d');
+			this.video.volume = 0.4;
+			this.video.removeAttribute('muted');
 			this.addEvents();
+			this.setDither();
 		}
 	}
 
@@ -21,6 +25,7 @@ class pdvPreview {
 
 		this.video.addEventListener('canplay', () => {
 			this.computeFrame();
+			this.video.classList.add('show-on-hover')
 		}, false);
 
 		this.canvas.addEventListener('click', () => {
@@ -31,19 +36,21 @@ class pdvPreview {
 			}
 		}, false);
 
-		// Custom `pdvFormChange` created in `_form.js`
+		// Custom events created in `_form.js`
 		document.addEventListener('pdvFormChange', () => {
 			this.computeFrame();
 		});
 
-		// Custom `pdvFormScaleChange` created in `_form.js`
 		document.addEventListener('pdvFormScaleChange', e => {
 			this.setScale(e.detail);
 		});
 
-		// Custom `pdvFormVideoChange` created in `_form.js`
 		document.addEventListener('pdvFormVideoChange', () => {
 			this.setVideo();
+		});
+
+		document.querySelector('.pdv-form-dither').addEventListener('change', () => {
+			this.setDither();
 		});
 	}
 
@@ -108,7 +115,7 @@ class pdvPreview {
 			// Get the drawn frame, get its data, and apply a filter
 			const frame = this.ctx.getImageData(0, 0, this.width, this.height);
 			const data = frame.data;
-			let newData = this.filter(data);
+			let newData = this.applyFilter(data);
 			// Reset the frame to black again
 			this.ctx.fillStyle = '#000';
 			this.ctx.fillRect(0, 0, this.width, this.height);
@@ -130,260 +137,302 @@ class pdvPreview {
 	}
 
 	setVideo() {
-		const fileInput = document.querySelector('form input[type="file"]')
+		const fileInput = document.querySelector('.pdv-form-file')
 		if (fileInput.files.length) {
 			this.video.src = URL.createObjectURL(fileInput.files[0]);
 			this.video.onload = function() {
 				URL.revokeObjectURL(this.video.src);
 			}
-			const output = document.querySelector('#output');
-			output.download = fileInput.files[0].name + '.pdv';
+			this.video.removeAttribute('poster');
 		}
 	}
 
-
-	/**
-	 * 
-	 * Filter and dithering effects
-	 *
-	 */
-	filter(data) {
-		const select = document.querySelector('#select-dither')
-		const selected = select.options[select.selectedIndex].value;
-		if(selected == "basic") {
-			return this.filterBasicThresholdWithError(data);
-		} else if(selected == "floydsteinberg") {
-			return this.filterFloydSteinberg(data);
-		} else if(selected == "stucki") {
-			return this.filterStucki(data);
-		} else if(selected == "atkinson") {
-			return this.filterAtkinson(data);
-		} else {
-			return this.filterBasicThreshold(data);
-		}
+	setDither() {
+		const select = document.querySelector('.pdv-form-dither')
+		this.filter = select.options[select.selectedIndex].value;
 	}
 
-	filterAtkinson(data) {
+
+	// Filter and dithering effects
+	applyFilter(data) {
 		const length = data.length;
 		let newData = new Uint8ClampedArray(length);
 
 		for (let i = 0; i < length; i += 4) {
+			// Column and row indexes
 			const col = Math.round(i % (this.width * 4) / 4);
 			const row = Math.round(i / (this.width * 4));
-
+			// RGB values
 			const red = data[i + 0];
 			const green = data[i + 1];
 			const blue = data[i + 2];
+			// Average for grayscale
 			const avg = (red + green + blue) / 3;
-
+			// Set new value
 			let newValue = 0;
 			if(avg > this.filterThreshold) {
 				newValue = 255;
 			}
-
+			// Set error
 			const error = avg - newValue;
-			const errorShare = error / 8;
-			if(col < this.width - 2) {
-				data[i + 4] += errorShare*1;
-				data[i + 5] += errorShare*1;
-				data[i + 6] += errorShare*1;
-				data[i + 8] += errorShare*1;
-				data[i + 9] += errorShare*1;
-				data[i + 10] += errorShare*1;
-			}
-			if(row < this.height - 2) {
-				if(col >= 1) {
-					data[i - 4 + (this.width * 4)] += errorShare*1;
-					data[i - 3 + (this.width * 4)] += errorShare*1;
-					data[i - 2 + (this.width * 4)] += errorShare*1;
-				}
-				data[i + 0 + (this.width * 4)] += errorShare*1;
-				data[i + 1 + (this.width * 4)] += errorShare*1;
-				data[i + 2 + (this.width * 4)] += errorShare*1;
-				data[i + 0 + (this.width * 4 * 2)] += errorShare*1;
-				data[i + 1 + (this.width * 4 * 2)] += errorShare*1;
-				data[i + 2 + (this.width * 4 * 2)] += errorShare*1;
+			// Apply dithering filter
+			if(this.filter == "bayer2") {
+			} else if(this.filter == "bayer4") {
+			} else if(this.filter == "bayer8") {
+			} else if(this.filter == "blue") {
+			} else if(this.filter == "floydsteinberg") {
+				//
+				// Floyd-Steinberg dithering
+				//
+				// 			X   7
+				// 		3   5   1
+				//
+				const errorShare = error / 16;
 				if(col < this.width - 1) {
-					data[i + 4 + (this.width * 4)] += errorShare*1;
-					data[i + 5 + (this.width * 4)] += errorShare*1;
-					data[i + 6 + (this.width * 4)] += errorShare*1;
+					// [x+1][y]
+					data[i + 4] += errorShare*7;
+					data[i + 5] += errorShare*7;
+					data[i + 6] += errorShare*7;
 				}
-			}
-
-			newData[i + 0] = newValue;
-			newData[i + 1] = newValue;
-			newData[i + 2] = newValue;
-			newData[i + 3] = 255;
-		}
-		return newData;
-	}
-
-	filterStucki(data) {
-		const length = data.length;
-		let newData = new Uint8ClampedArray(length);
-
-		for (let i = 0; i < length; i += 4) {
-			const col = Math.round(i % (this.width * 4) / 4);
-			const row = Math.round(i / (this.width * 4));
-
-			const red = data[i + 0];
-			const green = data[i + 1];
-			const blue = data[i + 2];
-			const avg = (red + green + blue) / 3;
-
-			let newValue = 0;
-			if(avg > this.filterThreshold) {
-				newValue = 255;
-			}
-
-			const error = avg - newValue;
-			const errorShare = error / 42;
-			if(col < this.width - 2) {
-				data[i + 4] += errorShare*8;
-				data[i + 5] += errorShare*8;
-				data[i + 6] += errorShare*8;
-				data[i + 8] += errorShare*4;
-				data[i + 9] += errorShare*4;
-				data[i + 10] += errorShare*4;
-			}
-			if(row < this.height - 2) {
-				if(col >= 2) {
-					data[i - 4 + (this.width * 4)] += errorShare*4;
-					data[i - 3 + (this.width * 4)] += errorShare*4;
-					data[i - 2 + (this.width * 4)] += errorShare*4;
-					data[i - 8 + (this.width * 4)] += errorShare*2;
-					data[i - 7 + (this.width * 4)] += errorShare*2;
-					data[i - 6 + (this.width * 4)] += errorShare*2;
-
-					data[i - 4 + (this.width * 4 * 2)] += errorShare*2;
-					data[i - 3 + (this.width * 4 * 2)] += errorShare*2;
-					data[i - 2 + (this.width * 4 * 2)] += errorShare*2;
-					data[i - 8 + (this.width * 4 * 2)] += errorShare*1;
-					data[i - 7 + (this.width * 4 * 2)] += errorShare*1;
-					data[i - 6 + (this.width * 4 * 2)] += errorShare*1;
+				if(row < this.height - 1) {
+					if(col > 0) {
+						// [x-1][y+1]
+						data[i - 4 + (this.width * 4)] += errorShare*3;
+						data[i - 3 + (this.width * 4)] += errorShare*3;
+						data[i - 2 + (this.width * 4)] += errorShare*3;
+					}
+					// [x][y+1]
+					data[i + 0 + (this.width * 4)] += errorShare*5;
+					data[i + 1 + (this.width * 4)] += errorShare*5;
+					data[i + 2 + (this.width * 4)] += errorShare*5;
+					if(col < this.width - 1) {
+						// [x+1][y+1]
+						data[i + 4 + (this.width * 4)] += errorShare*1;
+						data[i + 5 + (this.width * 4)] += errorShare*1;
+						data[i + 6 + (this.width * 4)] += errorShare*1;
+					}
 				}
-				data[i + 0 + (this.width * 4)] += errorShare*8;
-				data[i + 1 + (this.width * 4)] += errorShare*8;
-				data[i + 2 + (this.width * 4)] += errorShare*8;
-				data[i + 0 + (this.width * 4 * 2)] += errorShare*4;
-				data[i + 1 + (this.width * 4 * 2)] += errorShare*4;
-				data[i + 2 + (this.width * 4 * 2)] += errorShare*4;
+			} else if(this.filter == "jarvis") {
+				//
+				// Jarvis, Judice, and Ninke dithering
+				//
+				//             X   7   5
+				// 	   3   5   7   5   3
+				// 	   1   3   5   3   1
+				//
+				const errorShare = error / 48;
 				if(col < this.width - 2) {
-					data[i + 4 + (this.width * 4)] += errorShare*4;
-					data[i + 5 + (this.width * 4)] += errorShare*4;
-					data[i + 6 + (this.width * 4)] += errorShare*4;
-					data[i + 8 + (this.width * 4)] += errorShare*2;
-					data[i + 9 + (this.width * 4)] += errorShare*2;
-					data[i + 10 + (this.width * 4)] += errorShare*2;
-
-					data[i + 4 + (this.width * 4 * 2)] += errorShare*1;
-					data[i + 5 + (this.width * 4 * 2)] += errorShare*1;
-					data[i + 6 + (this.width * 4 * 2)] += errorShare*1;
-					data[i + 8 + (this.width * 4 * 2)] += errorShare*1;
-					data[i + 9 + (this.width * 4 * 2)] += errorShare*1;
-					data[i + 10 + (this.width * 4 * 2)] += errorShare*1;
+					// [x+1][y]
+					data[i + 4] += errorShare*7;
+					data[i + 5] += errorShare*7;
+					data[i + 6] += errorShare*7;
+					// [x+2][y]
+					data[i + 8] += errorShare*5;
+					data[i + 9] += errorShare*5;
+					data[i + 10] += errorShare*5;
+				}
+				if(row < this.height - 2) {
+					if(col >= 2) {
+						// [x-2][y+1]
+						data[i - 8 + (this.width * 4)] += errorShare*3;
+						data[i - 7 + (this.width * 4)] += errorShare*3;
+						data[i - 6 + (this.width * 4)] += errorShare*3;
+						// [x-1][y+1]
+						data[i - 4 + (this.width * 4)] += errorShare*5;
+						data[i - 3 + (this.width * 4)] += errorShare*5;
+						data[i - 2 + (this.width * 4)] += errorShare*5;
+						// [x-2][y+2]
+						data[i - 8 + (this.width * 4 * 2)] += errorShare*1;
+						data[i - 7 + (this.width * 4 * 2)] += errorShare*1;
+						data[i - 6 + (this.width * 4 * 2)] += errorShare*1;
+						// [x-1][y+2]
+						data[i - 4 + (this.width * 4 * 2)] += errorShare*3;
+						data[i - 3 + (this.width * 4 * 2)] += errorShare*3;
+						data[i - 2 + (this.width * 4 * 2)] += errorShare*3;
+					}
+					// [x][y+1]
+					data[i + 0 + (this.width * 4)] += errorShare*7;
+					data[i + 1 + (this.width * 4)] += errorShare*7;
+					data[i + 2 + (this.width * 4)] += errorShare*7;
+					// [x][y+2]
+					data[i + 0 + (this.width * 4 * 2)] += errorShare*5;
+					data[i + 1 + (this.width * 4 * 2)] += errorShare*5;
+					data[i + 2 + (this.width * 4 * 2)] += errorShare*5;
+					if(col < this.width - 2) {
+						// [x+1][y+1]
+						data[i + 4 + (this.width * 4)] += errorShare*5;
+						data[i + 5 + (this.width * 4)] += errorShare*5;
+						data[i + 6 + (this.width * 4)] += errorShare*5;
+						// [x+2][y+1]
+						data[i + 8 + (this.width * 4)] += errorShare*3;
+						data[i + 9 + (this.width * 4)] += errorShare*3;
+						data[i + 10 + (this.width * 4)] += errorShare*3;
+						// [x+1][y+2]
+						data[i + 4 + (this.width * 4 * 2)] += errorShare*3;
+						data[i + 5 + (this.width * 4 * 2)] += errorShare*3;
+						data[i + 6 + (this.width * 4 * 2)] += errorShare*3;
+						// [x+2][y+2]
+						data[i + 8 + (this.width * 4 * 2)] += errorShare*1;
+						data[i + 9 + (this.width * 4 * 2)] += errorShare*1;
+						data[i + 10 + (this.width * 4 * 2)] += errorShare*1;
+					}
+				}
+			} else if(this.filter == "stucki") {
+				//
+				// Stucki dithering
+				//
+				// 				X   8   4
+				//  	2   4   8   4   2
+				//  	1   2   4   2   1
+				//
+				const errorShare = error / 42;
+				if(col < this.width - 2) {
+					// [x+1][y]
+					data[i + 4] += errorShare*8;
+					data[i + 5] += errorShare*8;
+					data[i + 6] += errorShare*8;
+					// [x+2][y]
+					data[i + 8] += errorShare*4;
+					data[i + 9] += errorShare*4;
+					data[i + 10] += errorShare*4;
+				}
+				if(row < this.height - 2) {
+					if(col >= 2) {
+						// [x-2][y+1]
+						data[i - 8 + (this.width * 4)] += errorShare*2;
+						data[i - 7 + (this.width * 4)] += errorShare*2;
+						data[i - 6 + (this.width * 4)] += errorShare*2;
+						// [x-1][y+1]
+						data[i - 4 + (this.width * 4)] += errorShare*4;
+						data[i - 3 + (this.width * 4)] += errorShare*4;
+						data[i - 2 + (this.width * 4)] += errorShare*4;
+						// [x-2][y+2]
+						data[i - 8 + (this.width * 4 * 2)] += errorShare*1;
+						data[i - 7 + (this.width * 4 * 2)] += errorShare*1;
+						data[i - 6 + (this.width * 4 * 2)] += errorShare*1;
+						// [x-1][y+2]
+						data[i - 4 + (this.width * 4 * 2)] += errorShare*2;
+						data[i - 3 + (this.width * 4 * 2)] += errorShare*2;
+						data[i - 2 + (this.width * 4 * 2)] += errorShare*2;
+					}
+					// [x][y+1]
+					data[i + 0 + (this.width * 4)] += errorShare*8;
+					data[i + 1 + (this.width * 4)] += errorShare*8;
+					data[i + 2 + (this.width * 4)] += errorShare*8;
+					// [x][y+2]
+					data[i + 0 + (this.width * 4 * 2)] += errorShare*4;
+					data[i + 1 + (this.width * 4 * 2)] += errorShare*4;
+					data[i + 2 + (this.width * 4 * 2)] += errorShare*4;
+					if(col < this.width - 2) {
+						// [x+1][y+1]
+						data[i + 4 + (this.width * 4)] += errorShare*4;
+						data[i + 5 + (this.width * 4)] += errorShare*4;
+						data[i + 6 + (this.width * 4)] += errorShare*4;
+						// [x+2][y+1]
+						data[i + 8 + (this.width * 4)] += errorShare*2;
+						data[i + 9 + (this.width * 4)] += errorShare*2;
+						data[i + 10 + (this.width * 4)] += errorShare*2;
+						// [x+1][y+2]
+						data[i + 4 + (this.width * 4 * 2)] += errorShare*2;
+						data[i + 5 + (this.width * 4 * 2)] += errorShare*2;
+						data[i + 6 + (this.width * 4 * 2)] += errorShare*2;
+						// [x+2][y+2]
+						data[i + 8 + (this.width * 4 * 2)] += errorShare*1;
+						data[i + 9 + (this.width * 4 * 2)] += errorShare*1;
+						data[i + 10 + (this.width * 4 * 2)] += errorShare*1;
+					}
+				}
+			} else if(this.filter == "atkinson") {
+				//
+				// Atkinson dithering
+				//
+				// 		 X   1   1
+				//   1   1   1
+				//       1
+				//
+				const errorShare = error / 8;
+				if(col < this.width - 2) {
+					// [x+1][y]
+					data[i + 4] += errorShare*1;
+					data[i + 5] += errorShare*1;
+					data[i + 6] += errorShare*1;
+					// [x+2][y]
+					data[i + 8] += errorShare*1;
+					data[i + 9] += errorShare*1;
+					data[i + 10] += errorShare*1;
+				}
+				if(row < this.height - 2) {
+					if(col >= 1) {
+						// [x-1][y+1]
+						data[i - 4 + (this.width * 4)] += errorShare*1;
+						data[i - 3 + (this.width * 4)] += errorShare*1;
+						data[i - 2 + (this.width * 4)] += errorShare*1;
+					}
+					// [x][y+1]
+					data[i + 0 + (this.width * 4)] += errorShare*1;
+					data[i + 1 + (this.width * 4)] += errorShare*1;
+					data[i + 2 + (this.width * 4)] += errorShare*1;
+					// [x][y+2]
+					data[i + 0 + (this.width * 4 * 2)] += errorShare*1;
+					data[i + 1 + (this.width * 4 * 2)] += errorShare*1;
+					data[i + 2 + (this.width * 4 * 2)] += errorShare*1;
+					if(col < this.width - 1) {
+						// [x+1][y+1]
+						data[i + 4 + (this.width * 4)] += errorShare*1;
+						data[i + 5 + (this.width * 4)] += errorShare*1;
+						data[i + 6 + (this.width * 4)] += errorShare*1;
+					}
+				}
+			} else if(this.filter == "burkes") {
+				//
+				// Burkes dithering
+				//
+				//           X   8   4
+     			//   2   4   8   4   2
+				//
+				const errorShare = error / 32;
+				if(row < this.height - 1) {
+					if(col >= 2) {
+						// [x-2][y+1]
+						data[i - 8 + (this.width * 4)] += errorShare*2;
+						data[i - 7 + (this.width * 4)] += errorShare*2;
+						data[i - 6 + (this.width * 4)] += errorShare*2;
+						// [x-1][y+1]
+						data[i - 4 + (this.width * 4)] += errorShare*4;
+						data[i - 3 + (this.width * 4)] += errorShare*4;
+						data[i - 2 + (this.width * 4)] += errorShare*4;
+					}
+					// [x][y+1]
+					data[i + 0 + (this.width * 4)] += errorShare*8;
+					data[i + 1 + (this.width * 4)] += errorShare*8;
+					data[i + 2 + (this.width * 4)] += errorShare*8;
+					if(col < this.width - 2) {
+						// [x+1][y]
+						data[i + 4] += errorShare*8;
+						data[i + 5] += errorShare*8;
+						data[i + 6] += errorShare*8;
+						// [x+2][y]
+						data[i + 8] += errorShare*4;
+						data[i + 9] += errorShare*4;
+						data[i + 10] += errorShare*4;
+						// [x+1][y+1]
+						data[i + 4 + (this.width * 4)] += errorShare*4;
+						data[i + 5 + (this.width * 4)] += errorShare*4;
+						data[i + 6 + (this.width * 4)] += errorShare*4;
+						// [x+2][y+1]
+						data[i + 8 + (this.width * 4)] += errorShare*2;
+						data[i + 9 + (this.width * 4)] += errorShare*2;
+						data[i + 10 + (this.width * 4)] += errorShare*2;
+					}
 				}
 			}
-
+			// Apply new values
 			newData[i + 0] = newValue;
 			newData[i + 1] = newValue;
 			newData[i + 2] = newValue;
 			newData[i + 3] = 255;
 		}
+
 		return newData;
 	}
-
-	filterFloydSteinberg(data) {
-		const length = data.length;
-		let newData = new Uint8ClampedArray(length);
-
-		for (let i = 0; i < length; i += 4) {
-			const col = Math.round(i % (this.width * 4) / 4);
-			const row = Math.round(i / (this.width * 4));
-
-			const red = data[i + 0];
-			const green = data[i + 1];
-			const blue = data[i + 2];
-			const avg = (red + green + blue) / 3;
-
-			let newValue = 0;
-			if(avg > this.filterThreshold) {
-				newValue = 255;
-			}
-			const error = avg - newValue;
-			const errorShare = error / 16;
-			if(col < this.width - 1) {
-				data[i + 4] += errorShare*7;
-				data[i + 5] += errorShare*7;
-				data[i + 6] += errorShare*7;
-			}
-			if(row < this.height - 1) {
-				if(col > 0) {
-					data[i - 4 + (this.width * 4)] += errorShare*3;
-					data[i - 3 + (this.width * 4)] += errorShare*3;
-					data[i - 2 + (this.width * 4)] += errorShare*3;
-				}
-				data[i + 0 + (this.width * 4)] += errorShare*5;
-				data[i + 1 + (this.width * 4)] += errorShare*5;
-				data[i + 2 + (this.width * 4)] += errorShare*5;
-				if(col < this.width - 1) {
-					data[i + 4 + (this.width * 4)] += errorShare*1;
-					data[i + 5 + (this.width * 4)] += errorShare*1;
-					data[i + 6 + (this.width * 4)] += errorShare*1;
-				}
-			}
-
-			newData[i + 0] = newValue;
-			newData[i + 1] = newValue;
-			newData[i + 2] = newValue;
-			newData[i + 3] = 255;
-		}
-		return newData;
-	}
-
-	filterBasicThreshold(data) {
-		const length = data.length;
-		let newData = new Uint8ClampedArray(length);
-		for (let i = 0; i < length; i += 4) {
-			const red = data[i + 0];
-			const green = data[i + 1];
-			const blue = data[i + 2];
-			const avg = (red + green + blue) / 3;
-			let newValue = 0;
-			if(avg > this.filterThreshold) {
-				newValue = 255;
-			}
-			newData[i + 0] = newValue;
-			newData[i + 1] = newValue;
-			newData[i + 2] = newValue;
-			newData[i + 3] = 255;
-		}
-		return newData;
-	}
-
-	filterBasicThresholdWithError(data) {
-		const length = data.length;
-		let newData = new Uint8ClampedArray(length);
-		let previousError = 0;
-		for (let i = 0; i < length; i += 4) {
-			const red = data[i + 0];
-			const green = data[i + 1];
-			const blue = data[i + 2];
-			const avg = (red + green + blue) / 3 + previousError;
-			let newValue = 0;
-			if(avg > this.width) {
-				newValue = 255;
-			}
-			previousError = avg - newValue;
-			if(i % this.width == 0) {
-				previousError = 0;
-			}
-			newData[i + 0] = newValue;
-			newData[i + 1] = newValue;
-			newData[i + 2] = newValue;
-			newData[i + 3] = 255;
-		}
-		return newData;
-	}
-
 }

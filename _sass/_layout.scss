@@ -29,12 +29,16 @@
 	right: 0;
 	top: 0;
 	object-fit: cover;
-	opacity: 0;
-	transition: opacity linear 0.1s;
 }
 
-.screen:hover #source {
-	opacity: 0.8;
+.show-on-hover {
+	opacity: 0;
+	transition: opacity linear 0.1s;
+
+	.screen:hover &,
+	&:focus {
+		opacity: 0.8;
+	}
 }
 
 #preview {
