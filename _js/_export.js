@@ -1,12 +1,46 @@
 class pdvExport {
 
 	constructor() {
+		if(typeof pako == 'undefined') {
+			this.addZlibScript(() => console.log(pako));
+		}
+
+		this.button = document.querySelector('#download');
+		this.addEvents();
 	}
 
-	outputDownload() {
-		//
-		// Output download
-		//
+	addEvents() {
+		this.button.addEventListener('click', e => {
+			this.download();
+		});
+	}
+
+	download() {
+		const blob = this.getBlob();
+		const blobURL = URL.createObjectURL(blob);
+		URL.revokeObjectURL(blob);
+		const a = document.createElement('a');
+		a.setAttribute('href', blobURL);
+		a.setAttribute('download', 'sample.pdv');
+		a.style.display = 'none';
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+	}
+
+	addZlibScript(callback) {
+		const script = document.createElement('script');
+		script.src = '/assets/js/pako.min.js';
+		document.body.append(script);
+
+		script.addEventListener('load', e => {
+			if(callback) {
+				callback();
+			}
+		});
+	}
+
+	getBlob() {
 		// Ident
 		let width = 400;
 		let height = 240;
@@ -33,29 +67,27 @@ class pdvExport {
 		let frameheight = new Uint16Array(1);
 		frameheight[0] = height;
 
-		// Frame Table
+		// TODO: Frame Table
+		const frame = window.pdvApp.preview.ctx.getImageData(0, 0, 400, 240);
+		const data = frame.data;
+		const zippedFrameData = pako.deflate(data);
 
-		const blob = new Blob([ident, numFrames, reserved, framerate, framewidth, frameheight], {type : 'application/octet-stream'});
-		output.href = URL.createObjectURL(blob);
-		URL.revokeObjectURL(blob);
+		return new Blob([ident, numFrames, reserved, framerate, framewidth, frameheight, zippedFrameData], {type : 'application/octet-stream'});
+	}
 
-		const textarea = document.querySelector('#textarea');
-		blob.text().then(value => { textarea.value = value })
-
-		function serializeFrame() {
-			const frame = ctx.getImageData(0, 0, width, height);
-			const data = frame.data;
-			let newDataArray = new Array();
-			data.forEach((e, i) => {
-				// console.log(e, i);
-				let value = 0;
-				if(e === 255) {
-					value = 1;
-				}
-				newDataArray.push(value);
-			});
-			return newDataArray;
-		}
+	serializeFrame() {
+		const frame = ctx.getImageData(0, 0, width, height);
+		const data = frame.data;
+		let newDataArray = new Array();
+		data.forEach((e, i) => {
+			// console.log(e, i);
+			let value = 0;
+			if(e === 255) {
+				value = 1;
+			}
+			newDataArray.push(value);
+		});
+		return newDataArray;
 	}
 
 	callServerSideFunction() {

@@ -13,4 +13,9 @@ input::file-selector-button {
 	font-size: inherit;
 	font-weight: inherit;
 	text-decoration: none;
+
+	&:active {
+		transform: translateY(#{rem(2px)});
+		transform: scale(0.94444);
+	}
 }
