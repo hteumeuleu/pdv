@@ -16,12 +16,20 @@ class pdvExport {
 	}
 
 	download() {
+		// Get file name
+		let filename = 'sample.pdv';
+		const fileInput = document.querySelector('.pdv-form-file')
+		if (fileInput.files.length) {
+			filename = fileInput.files[0].name + '.pdv';
+		}
+		// Get blob URL
 		const blob = this.getBlob();
 		const blobURL = URL.createObjectURL(blob);
 		URL.revokeObjectURL(blob);
+		// Create invisible link
 		const a = document.createElement('a');
 		a.setAttribute('href', blobURL);
-		a.setAttribute('download', 'sample.pdv');
+		a.setAttribute('download', filename);
 		a.style.display = 'none';
 		document.body.appendChild(a);
 		a.click();

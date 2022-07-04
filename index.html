@@ -7,25 +7,24 @@ layout: default
 </div>
 <form method="post">
 	<div>
-		<input type="file" accept="video/*" />
+		<input class="pdv-form-file" type="file" accept="video/*" />
 	</div>
 	<div>
 		<label for="select-dither">Dither</label>
-		<select id="select-dither">
+		<select class="pdv-form-dither" id="select-dither">
 			<option value="threshold">Threshold</option>
-			<option value="basic">Basic error</option>
-			<option value="xxxxx" disabled>Bayer 2&times;2</option>
-			<option value="xxxxx" disabled>Bayer 4&times;4</option>
-			<option value="xxxxx" disabled>Bayer 8&times;8</option>
-			<option value="xxxxx" disabled>Blue Pattern</option>
+			<option value="bayer2" disabled>Bayer 2&times;2</option>
+			<option value="bayer4" disabled>Bayer 4&times;4</option>
+			<option value="bayer8" disabled>Bayer 8&times;8</option>
+			<option value="blue" disabled>Blue Pattern</option>
 			<option value="floydsteinberg">Floyd-Steinberg</option>
-			<option value="xxxxx" disabled>Jarvis-Judice-Ninke</option>
+			<option value="jarvis">Jarvis-Judice-Ninke</option>
 			<option value="stucki">Stucki</option>
-			<option value="atkinson" selected>Atkinson</option>
-			<option value="xxxxx" disabled>Burkes</option>
-			<option value="xxxxx" disabled>Sierra</option>
-			<option value="xxxxx" disabled>Two-Row Sierra</option>
-			<option value="xxxxx" disabled>Sierra Lite</option>
+			<option value="atkinson">Atkinson</option>
+			<option value="burkes" selected>Burkes</option>
+			<option value="sierra" disabled>Sierra</option>
+			<option value="tworowsierra" disabled>Two-Row Sierra</option>
+			<option value="sierralite" disabled>Sierra Lite</option>
 		</select>
 	</div>
 	<div>
@@ -40,7 +39,7 @@ layout: default
 		</div>
 	</div>
 	<div>
-		<button id="download" type="button" class="button">Download</button>
+		<button class="pdv-form-button" id="download" type="button" class="button">Download</button>
 	</div>
 	<textarea id="textarea" style="width:100%; height:10rem;" hidden></textarea>
 </form>
