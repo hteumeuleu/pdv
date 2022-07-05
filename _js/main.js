@@ -9,6 +9,8 @@ permalink: "/assets/js/script.js"
 class pdvApp {
 
 	constructor() {
+		this.width = 400;
+		this.height = 240;
 		this.preview = new pdvPreview();
 		this.form = new pdvForm();
 		this.export = new pdvExport();
@@ -17,5 +19,5 @@ class pdvApp {
 }
 
 document.addEventListener('DOMContentLoaded', e => {
-	window.pdvApp = new pdvApp();
+	window.app = new pdvApp();
 })

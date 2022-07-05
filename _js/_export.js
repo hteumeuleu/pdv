@@ -1,18 +1,24 @@
 class pdvExport {
 
 	constructor() {
-		if(typeof pako == 'undefined') {
-			this.addZlibScript(() => console.log(pako));
-		}
-
 		this.button = document.querySelector('#download');
 		this.addEvents();
 	}
 
 	addEvents() {
 		this.button.addEventListener('click', e => {
-			this.download();
+			this.downloadHandler();
 		});
+	}
+
+	downloadHandler() {
+		if(typeof pako == 'undefined') {
+			this.addZlibScript(() => {
+				this.download();
+			});
+		} else {
+			this.download();
+		}
 	}
 
 	download() {
@@ -58,14 +64,14 @@ class pdvExport {
 
 		// Number of frames
 		let numFrames = new Uint16Array(1);
-		numFrames[0] = 30;
+		numFrames[0] = 4;
 
 		// Reserved, always 0
 		let reserved = new Uint16Array(1);
 
 		// Framerate
 		let framerate = new Float32Array(1);
-		framerate[0] = 30;
+		framerate[0] = 1;
 
 		// Frame width
 		let framewidth = new Uint16Array(1);
@@ -75,29 +81,39 @@ class pdvExport {
 		let frameheight = new Uint16Array(1);
 		frameheight[0] = height;
 
-		// TODO: Frame Table
-		const frame = window.pdvApp.preview.ctx.getImageData(0, 0, 400, 240);
-		const data = frame.data;
-		const zippedFrameData = pako.deflate(data);
+		// Zeros, after frametable
+		let zeros = new Uint32Array(1);
 
-		return new Blob([ident, numFrames, reserved, framerate, framewidth, frameheight, zippedFrameData], {type : 'application/octet-stream'});
+		// Frame Table & Frame Data
+		let frametable = new Uint32Array(numFrames[0]);
+		let framedata = new Array();
+		let frameDataOffset = 0;
+		for (let i = 0; i < frametable.length; i++) {
+			// Set Frame Data
+			const data1bit = this.getFrameArray();
+			const dataZipped = pako.deflate(data1bit);
+			const dataLength = dataZipped.byteLength;
+			framedata.push(dataZipped);
+			// Set Frame Table
+			let frameType = 1;
+			frametable[i] = (frameDataOffset << 2) + frameType;
+			// Increase offset for next frame
+			frameDataOffset += dataLength;
+		}
+		let blobArray = [ident, numFrames, reserved, framerate, framewidth, frameheight, frametable, zeros];
+		blobArray = blobArray.concat(framedata);
+		return new Blob(blobArray, {type : 'application/octet-stream'});
 	}
 
-	serializeFrame() {
-		const frame = ctx.getImageData(0, 0, width, height);
-		const data = frame.data;
-		let newDataArray = new Array();
-		data.forEach((e, i) => {
-			// console.log(e, i);
+	getFrameArray() {
+		const frame = app.preview.getFrame();
+		const dataRGB = frame.data;
+		let data1bit = new Uint8Array(app.width * app.height);
+		for (let i = 0; i < dataRGB.length; i += 4) {
 			let value = 0;
-			if(e === 255) {
+			if(dataRGB[i] == 255) {
 				value = 1;
 			}
-			newDataArray.push(value);
-		});
-		return newDataArray;
-	}
-
 			data1bit[i / 4] = value;
 		}
 		return data1bit;
