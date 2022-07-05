@@ -98,36 +98,8 @@ class pdvExport {
 		return newDataArray;
 	}
 
-	callServerSideFunction() {
-		const textarea = document.querySelector('#textarea');
-		const output = document.querySelector('#output');
-		// Calling Netlify functions: pdv.js
-		const aSingleFrame = serializeFrame();
-		const message = JSON.stringify({
-			width: 400,
-			height: 240,
-			framerate: 30,
-			frames: [
-				aSingleFrame
-			]
-		});
-		const endpoint = "/.netlify/functions/pdv";
-		fetch(endpoint, {
-			method: 'POST',
-			body: message
-		})
-		.then(response => response.json())
-		.then(data => {
-			console.log('Success:', data);
-			textarea.value = textarea.value + "\n\n" + data.buffer;
-			const encoder = new TextEncoder();
-			const view = encoder.encode(data.buffer);
-			const responseBlob = new Blob([view], {type : 'application/octet-stream'});
-			output.href = URL.createObjectURL(responseBlob);
-			URL.revokeObjectURL(responseBlob);
-		})
-		.catch((error) => {
-		  console.error('Error:', error);
-		});
+			data1bit[i / 4] = value;
+		}
+		return data1bit;
 	}
 }
