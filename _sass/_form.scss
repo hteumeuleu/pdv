@@ -5,3 +5,13 @@ input[type="file"] {
 form > div:not(:last-child) {
 	margin-bottom: rem(8px);
 }
+
+.form-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+}
+
+.form-message {
+	padding: rem(8px);
+}

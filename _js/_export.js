@@ -88,10 +88,12 @@ class pdvExport {
 
 			// Play video to get every frame
 			if(app && app.preview && app.preview.video) {
+				const that = this || app.export;
 				let video = app.preview.video;
 				video.removeAttribute('loop');
 				video.removeAttribute('controls');
-				const that = this || app.export;
+				app.form.showMessage();
+				that.button.setAttribute('disabled', 'disabled');
 
 				function doSomethingWithTheFrame(now, metadata) {
 					// Push Frame Data
@@ -104,6 +106,9 @@ class pdvExport {
 					// Increase offset for next frame
 					const dataLength = dataZipped.byteLength;
 					frameDataOffset += dataLength;
+					// Update message
+					let timeRemaining = Math.round(video.duration - video.currentTime);
+					app.form.updateMessage(timeRemaining + "s");
 					// Re-register the callback to be notified about the next frame.
 					video.requestVideoFrameCallback(doSomethingWithTheFrame);
 				}
@@ -112,6 +117,9 @@ class pdvExport {
 				video.addEventListener('ended', e => {
 					video.setAttribute('loop', 'loop');
 					video.setAttribute('controls', 'controls');
+					app.form.hideMessage();
+					that.button.removeAttribute('disabled');
+
 					const frametableUint32 = Uint32Array.from(frametable);
 
 					// Number of frames

@@ -2,6 +2,7 @@ class pdvForm {
 
 	constructor() {
 		this.form = document.querySelector('form');
+		this.message = document.querySelector('.form-message');
 		this.addEvents();
 	}
 
@@ -58,5 +59,17 @@ class pdvForm {
 			bubbles: true,
 			detail: +new Date()
 		}));
+	}
+
+	showMessage() {
+		this.message.removeAttribute('hidden');
+	}
+
+	hideMessage() {
+		this.message.setAttribute('hidden', 'hidden');
+	}
+
+	updateMessage(value) {
+		this.message.querySelector('.form-message-value').innerHTML = value;
 	}
 }
