@@ -12,7 +12,7 @@ class pdvExport {
 	}
 
 	downloadHandler() {
-		if(typeof pako == 'undefined') {
+		if(typeof fflate == 'undefined') {
 			this.addZlibScript(() => {
 				this.download();
 			});
@@ -44,7 +44,7 @@ class pdvExport {
 
 	addZlibScript(callback) {
 		const script = document.createElement('script');
-		script.src = '/assets/js/pako.min.js';
+		script.src = '/assets/js/fflate.min.js';
 		document.body.append(script);
 
 		script.addEventListener('load', e => {
@@ -91,7 +91,7 @@ class pdvExport {
 		for (let i = 0; i < frametable.length; i++) {
 			// Set Frame Data
 			const data1bit = this.getFrameArray();
-			const dataZipped = pako.deflate(data1bit);
+			const dataZipped = fflate.zlibSync(data1bit);
 			const dataLength = dataZipped.byteLength;
 			framedata.push(dataZipped);
 			// Set Frame Table
