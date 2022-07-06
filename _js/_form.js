@@ -25,6 +25,19 @@ class pdvForm {
 		fileInput.addEventListener('change', e => {
 			this.triggerFormVideoChangeEvent();
 		});
+
+		// Dither select
+		const ditherSelect = document.querySelector('.pdv-form-dither')
+		ditherSelect.addEventListener('focus', e => {
+			if(app && app.preview && app.preview.video) {
+				app.preview.video.classList.remove('show-on-hover');
+			}
+		});
+		ditherSelect.addEventListener('blur', e => {
+			if(app && app.preview && app.preview.video) {
+				app.preview.video.classList.add('show-on-hover');
+			}
+		});
 	}
 
 	triggerFormChangeEvent() {
