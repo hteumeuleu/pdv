@@ -2,6 +2,8 @@ button,
 .button,
 input::file-selector-button {
 	display: inline-flex;
+	align-items: center;
+	justify-content: center;
 	padding: rem(8px) rem(16px);
 	color: $white;
 	background-color: $purple;
@@ -18,4 +20,14 @@ input::file-selector-button {
 		transform: translateY(#{rem(2px)});
 		transform: scale(0.94444);
 	}
+}
+
+input::file-selector-button {
+	background-color: $darkgrey;
+}
+
+.button-big {
+	min-width: rem(196px);
+	min-height: rem(48px);
+	font-size: rem(20px);
 }
