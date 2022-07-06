@@ -5,6 +5,7 @@ permalink: "/assets/js/script.js"
 {% include_relative _preview.js %}
 {% include_relative _form.js %}
 {% include_relative _export.js %}
+{% include_relative _rvfc-polyfill.js %}
 
 class pdvApp {
 

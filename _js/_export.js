@@ -30,16 +30,20 @@ class pdvExport {
 		}
 		// Get blob URL
 		const blob = this.getBlob();
-		const blobURL = URL.createObjectURL(blob);
-		URL.revokeObjectURL(blob);
-		// Create invisible link
-		const a = document.createElement('a');
-		a.setAttribute('href', blobURL);
-		a.setAttribute('download', filename);
-		a.style.display = 'none';
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
+		blob.then((value) => {
+			const blobURL = URL.createObjectURL(value);
+			URL.revokeObjectURL(value);
+			// Create invisible link
+			const a = document.createElement('a');
+			a.setAttribute('href', blobURL);
+			a.setAttribute('download', filename);
+			a.style.display = 'none';
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+		}).catch((reason) => {
+			console.error(reason);
+		});
 	}
 
 	addZlibScript(callback) {
@@ -54,55 +58,82 @@ class pdvExport {
 		});
 	}
 
-	getBlob() {
-		// Ident
-		let width = 400;
-		let height = 240;
-		const identString = "Playdate VID"
-		let ident = new Uint8Array(16);
-		ident.set(identString.split("").map(x => x.charCodeAt()));
+	async getBlob() {
+		return new Promise(function(resolve, reject) {
+			// Ident
+			let width = 400;
+			let height = 240;
+			const identString = "Playdate VID"
+			let ident = new Uint8Array(16);
+			ident.set(identString.split("").map(x => x.charCodeAt()));
 
-		// Number of frames
-		let numFrames = new Uint16Array(1);
-		numFrames[0] = 4;
+			// Number of frames
+			let numFrames = new Uint16Array(1);
+			numFrames[0] = 4;
 
-		// Reserved, always 0
-		let reserved = new Uint16Array(1);
+			// Reserved, always 0
+			let reserved = new Uint16Array(1);
 
-		// Framerate
-		let framerate = new Float32Array(1);
-		framerate[0] = 1;
+			// Framerate
+			let framerate = new Float32Array(1);
+			framerate[0] = 30;
 
-		// Frame width
-		let framewidth = new Uint16Array(1);
-		framewidth[0] = width;
+			// Frame width
+			let framewidth = new Uint16Array(1);
+			framewidth[0] = width;
 
-		// Frame height
-		let frameheight = new Uint16Array(1);
-		frameheight[0] = height;
+			// Frame height
+			let frameheight = new Uint16Array(1);
+			frameheight[0] = height;
 
-		// Zeros, after frametable
-		let zeros = new Uint32Array(1);
+			// Zeros, after frametable
+			let zeros = new Uint32Array(1);
 
-		// Frame Table & Frame Data
-		let frametable = new Uint32Array(numFrames[0]);
-		let framedata = new Array();
-		let frameDataOffset = 0;
-		for (let i = 0; i < frametable.length; i++) {
-			// Set Frame Data
-			const data1bit = this.getFrameArray();
-			const dataZipped = fflate.zlibSync(data1bit);
-			const dataLength = dataZipped.byteLength;
-			framedata.push(dataZipped);
-			// Set Frame Table
-			let frameType = 1;
-			frametable[i] = (frameDataOffset << 2) + frameType;
-			// Increase offset for next frame
-			frameDataOffset += dataLength;
-		}
-		let blobArray = [ident, numFrames, reserved, framerate, framewidth, frameheight, frametable, zeros];
-		blobArray = blobArray.concat(framedata);
-		return new Blob(blobArray, {type : 'application/octet-stream'});
+			// Frame Table & Frame Data
+			let frametable = new Array();
+			let framedata = new Array();
+			let frameDataOffset = 0;
+
+			// Play video to get every frame
+			if(app && app.preview && app.preview.video) {
+				let video = app.preview.video;
+				video.removeAttribute('loop');
+				video.removeAttribute('controls');
+				const that = this || app.export;
+
+				function doSomethingWithTheFrame(now, metadata) {
+					// Push Frame Data
+					const data1bit = that.getFrameArray();
+					const dataZipped = fflate.zlibSync(data1bit);
+					framedata.push(dataZipped);
+					// Push Frame Table
+					let frameType = 1;
+					frametable.push((frameDataOffset << 2) + frameType);
+					// Increase offset for next frame
+					const dataLength = dataZipped.byteLength;
+					frameDataOffset += dataLength;
+					// Re-register the callback to be notified about the next frame.
+					video.requestVideoFrameCallback(doSomethingWithTheFrame);
+				}
+				video.requestVideoFrameCallback(doSomethingWithTheFrame);
+
+				video.addEventListener('ended', e => {
+					video.setAttribute('loop', 'loop');
+					video.setAttribute('controls', 'controls');
+					const frametableUint32 = Uint32Array.from(frametable);
+					numFrames[0] = frametable.length;
+					let blobArray = [ident, numFrames, reserved, framerate, framewidth, frameheight, frametableUint32, zeros];
+					blobArray = blobArray.concat(framedata);
+					const blob = new Blob(blobArray, {type : 'application/octet-stream'});
+					resolve(blob);
+				});
+
+				video.play();
+				video.blur();
+			} else {
+				reject(Error('Object [video] is undefined.'))
+			}
+		});
 	}
 
 	getFrameArray() {
