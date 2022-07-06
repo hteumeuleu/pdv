@@ -109,12 +109,22 @@ class pdvExport {
 		const frame = app.preview.getFrame();
 		const dataRGB = frame.data;
 		let data1bit = new Uint8Array(app.width * app.height);
-		for (let i = 0; i < dataRGB.length; i += 4) {
-			let value = 0;
-			if(dataRGB[i] == 255) {
-				value = 1;
+		let j = 0;
+		for (let i = 0; i < dataRGB.length; i += 32) {
+			let chunk = 0;
+			let k = i;
+			for(let shift=7; shift >= 0; shift--) {
+				let value = dataRGB[k];
+				if(value == 255) {
+					value = 1;
+				} else {
+					value = 0;
+				}
+				k += 4;
+				chunk += (value << shift);
 			}
-			data1bit[i / 4] = value;
+			data1bit[j] = chunk;
+			j++;
 		}
 		return data1bit;
 	}
