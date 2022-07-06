@@ -67,16 +67,8 @@ class pdvExport {
 			let ident = new Uint8Array(16);
 			ident.set(identString.split("").map(x => x.charCodeAt()));
 
-			// Number of frames
-			let numFrames = new Uint16Array(1);
-			numFrames[0] = 4;
-
 			// Reserved, always 0
 			let reserved = new Uint16Array(1);
-
-			// Framerate
-			let framerate = new Float32Array(1);
-			framerate[0] = 30;
 
 			// Frame width
 			let framewidth = new Uint16Array(1);
@@ -121,7 +113,15 @@ class pdvExport {
 					video.setAttribute('loop', 'loop');
 					video.setAttribute('controls', 'controls');
 					const frametableUint32 = Uint32Array.from(frametable);
+
+					// Number of frames
+					let numFrames = new Uint16Array(1);
 					numFrames[0] = frametable.length;
+
+					// Framerate
+					let framerate = new Float32Array(1);
+					framerate[0] = frametable.length / video.duration;
+
 					let blobArray = [ident, numFrames, reserved, framerate, framewidth, frameheight, frametableUint32, zeros];
 					blobArray = blobArray.concat(framedata);
 					const blob = new Blob(blobArray, {type : 'application/octet-stream'});
