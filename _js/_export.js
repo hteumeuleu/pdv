@@ -112,26 +112,36 @@ class pdvExport {
 				video.requestVideoFrameCallback(doSomethingWithTheFrame);
 
 				video.addEventListener('ended', e => {
-					video.setAttribute('loop', 'loop');
-					video.setAttribute('controls', 'controls');
-					app.form.hideMessage();
-					that.button.removeAttribute('disabled');
+					// One final frame
+					// Push Frame Data
+					const data1bit = that.getFrameArray();
+					const dataZipped = fflate.zlibSync(data1bit);
+					framedata.push(dataZipped);
+					// Push Frame Table
+					let frameType = 1;
+					frametable.push((frameDataOffset << 2) + frameType);
 
 					// Frame Table
 					const frametableUint32 = Uint32Array.from(frametable);
 
 					// Number of frames
 					let numFrames = new Uint16Array(1);
-					numFrames[0] = frametable.length;
+					numFrames[0] = frametable.length - 1;
 
 					// Framerate
 					let framerate = new Float32Array(1);
-					framerate[0] = frametable.length / video.duration;
+					framerate[0] = (frametable.length - 1) / (video.duration / video.playbackRate);
 
 					let blobArray = [ident, numFrames, reserved, framerate, framewidth, frameheight, frametableUint32];
 					blobArray = blobArray.concat(framedata);
 					const blob = new Blob(blobArray, {type : 'application/octet-stream'});
 					resolve(blob);
+
+					// Reinit UI
+					video.setAttribute('loop', 'loop');
+					video.setAttribute('controls', 'controls');
+					app.form.hideMessage();
+					that.button.removeAttribute('disabled');
 				});
 
 				video.play();
