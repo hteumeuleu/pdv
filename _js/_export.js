@@ -112,14 +112,8 @@ class pdvExport {
 				video.requestVideoFrameCallback(doSomethingWithTheFrame);
 
 				video.addEventListener('ended', e => {
-					// One final frame
-					// Push Frame Data
-					const data1bit = that.getFrameArray();
-					const dataZipped = fflate.zlibSync(data1bit);
-					framedata.push(dataZipped);
-					// Push Frame Table
-					let frameType = 1;
-					frametable.push((frameDataOffset << 2) + frameType);
+					// Offset to end of file in Frame Table
+					frametable.push(frameDataOffset << 2);
 
 					// Frame Table
 					const frametableUint32 = Uint32Array.from(frametable);
