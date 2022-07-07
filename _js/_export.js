@@ -78,9 +78,6 @@ class pdvExport {
 			let frameheight = new Uint16Array(1);
 			frameheight[0] = height;
 
-			// Zeros, after frametable
-			let zeros = new Uint32Array(1);
-
 			// Frame Table & Frame Data
 			let frametable = new Array();
 			let framedata = new Array();
@@ -130,7 +127,7 @@ class pdvExport {
 					let framerate = new Float32Array(1);
 					framerate[0] = frametable.length / video.duration;
 
-					let blobArray = [ident, numFrames, reserved, framerate, framewidth, frameheight, frametableUint32, zeros];
+					let blobArray = [ident, numFrames, reserved, framerate, framewidth, frameheight, frametableUint32];
 					blobArray = blobArray.concat(framedata);
 					const blob = new Blob(blobArray, {type : 'application/octet-stream'});
 					resolve(blob);
