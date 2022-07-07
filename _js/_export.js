@@ -60,9 +60,9 @@ class pdvExport {
 
 	async getBlob() {
 		return new Promise(function(resolve, reject) {
-			// Ident
 			let width = 400;
 			let height = 240;
+			// Ident
 			const identString = "Playdate VID"
 			let ident = new Uint8Array(16);
 			ident.set(identString.split("").map(x => x.charCodeAt()));
@@ -117,6 +117,7 @@ class pdvExport {
 					app.form.hideMessage();
 					that.button.removeAttribute('disabled');
 
+					// Frame Table
 					const frametableUint32 = Uint32Array.from(frametable);
 
 					// Number of frames
