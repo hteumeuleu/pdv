@@ -3,14 +3,28 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8" />
-	<title>pdv</title>
+	<title>Playdate Video Encoder</title>
+	<meta name="description" content="Turn your videos into `.pdv` files to run on the Playdate." />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<link rel="stylesheet" type="text/css" href="{{ 'assets/css/styles.css?v=' | append: timestamp | relative_url }}" />
 	<script src="{{ 'assets/js/script.js?v=' | append: timestamp | relative_url }}"></script>
 </head>
 <body>
 	<div class="wrapper">
-	{{ content }}
+		<main role="main">
+			{{ content }}
+		</main>
+		<footer class="footer" role="contentinfo">
+			<p>
+				Made in France by <a href="https://twitter.com/HTeuMeuLeu">@HTeuMeuLeu</a>.
+			</p>
+			<p>
+				Huge thanks to <a href="https://twitter.com/rakujira">rakujira</a> for his personal help and his <a href="https://github.com/jaames/playdate-reverse-engineering">Playdate reverse engineering</a>. And thanks to <a href="https://twitter.com/davehayden">Dave Hayden</a> for his <a href="https://devforum.play.date/t/video-encoder-work-in-progress-mac-only/1390/6">1bitvideo</a> app.
+			</p>
+			<p>
+				Play videos on Playdate with <a href="https://github.com/hteumeuleu/playorama">Playorama</a>!
+			</p>
+		</footer>
 	</div>
 </body>
 </html>

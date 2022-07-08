@@ -1,0 +1,12 @@
+.footer {
+	margin-top: rem(48px);
+	border-radius: rem(16px);
+	padding: rem(24px);
+	text-align: center;
+	color: $screen-white;
+	background-color: #212223;
+
+	p:not(:last-child) {
+		margin-bottom: rem(16px);
+	}
+}
