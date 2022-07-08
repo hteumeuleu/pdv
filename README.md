@@ -1,6 +1,6 @@
-# Playdate Video encoder
+# Playdate Video Encoder
 
-This project is a Playdate Video encoder. `.pdv` files can be played on a Playdate using the [`video` player](https://sdk.play.date/1.12.1/Inside%20Playdate.html#C-graphics.video) in the SDK. You can also run a `.pdv` file using [Playorama](https://github.com/hteumeuleu/playorama), “_A cranky video player for the Playdate_”.
+This project is a Playdate Video encoder. `.pdv` files can be played on a Playdate using the [`video` player](https://sdk.play.date/1.12.1/Inside%20Playdate.html#C-graphics.video) in the SDK. You can also run a `.pdv` file using [Playorama](https://github.com/hteumeuleu/playorama), “_A cranky video player for the Playdate_” that I also built.
 
 ## Installation
 
