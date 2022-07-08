@@ -149,24 +149,29 @@ class pdvExport {
 	getFrameArray() {
 		const frame = app.preview.getFrame();
 		const dataRGB = frame.data;
-		let data1bit = new Uint8Array(app.width * app.height);
-		let j = 0;
-		for (let i = 0; i < dataRGB.length; i += 32) {
-			let chunk = 0;
-			let k = i;
-			for(let shift=7; shift >= 0; shift--) {
-				let value = dataRGB[k];
-				if(value == 255) {
-					value = 1;
-				} else {
-					value = 0;
-				}
-				k += 4;
-				chunk += (value << shift);
+		const src = new Uint8Array(app.width * app.height);
+		for (let i = 0; i < dataRGB.length; i += 4) {
+			let value = dataRGB[i];
+			if(value != 0) {
+				value = 1;
 			}
-			data1bit[j] = chunk;
-			j++;
+			src[i/4] = value;
 		}
-		return data1bit;
+		const dst = new Uint8Array(app.width * app.height / 8);
+		const dstSize = dst.byteLength;
+		let srcPtr = 0;
+		let dstPtr = 0;
+		while (dstPtr < dstSize) {
+			let byte = 0;
+			// pack every 8 pixels into one byte
+			for (let shift = 0; shift < 8; shift++) {
+				// if the input pixel isn't 0 (black), flip the output bit to 1 (white)
+				if (src[srcPtr++] !== 0) {
+				  byte |= (0x80 >> shift);
+				}
+			}
+			dst[dstPtr++] = byte;
+		}
+		return dst;
 	}
 }
