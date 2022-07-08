@@ -87,6 +87,7 @@ class pdvExport {
 			if(app && app.preview && app.preview.video) {
 				const that = this || app.export;
 				let video = app.preview.video;
+				video.currentTime = 0;
 				video.removeAttribute('loop');
 				video.removeAttribute('controls');
 				app.form.showMessage();
