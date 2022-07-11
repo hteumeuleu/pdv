@@ -1,8 +1,23 @@
 .wrapper {
-	max-width: rem(448px);
 	flex-grow: 0;
 	margin: auto;
 	padding: rem(16px);
+}
+
+@media only screen and (min-width:rem(1024px)) {
+	.app {
+		display: flex;
+		flex-wrap: wrap;
+
+		& > * {
+			flex-shrink: 0;
+			flex-grow: 0;
+		}
+
+		.form {
+			padding: rem(24px);
+		}
+	}
 }
 
 .screen {

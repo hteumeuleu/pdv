@@ -1,50 +1,52 @@
 ---
 layout: default
 ---
-<div class="screen">
-	<canvas class="pdv-preview-canvas" id="preview" width="400" height="240"></canvas>
-	<video class="pdv-preview-video" id="source" src="assets/videos/sample.mp4" poster="assets/images/sample.jpg" width="400" height="240" controls loop muted hidden playsinline disablepictureinpicture controlslist="nodownload nofullscreen noremoteplayback" preload="metadata" x-webkit-airplay="deny"></video>
+<div class="app">
+	<div class="screen">
+		<canvas class="pdv-preview-canvas" id="preview" width="400" height="240"></canvas>
+		<video class="pdv-preview-video" id="source" src="assets/videos/sample.mp4" poster="assets/images/sample.jpg" width="400" height="240" controls loop muted hidden playsinline disablepictureinpicture controlslist="nodownload nofullscreen noremoteplayback" preload="metadata" x-webkit-airplay="deny"></video>
+	</div>
+	<form class="form" method="post">
+		<div>
+			<label for="input-file" class="sr-only">Video file (mp4, webm, …)</label>
+			<input id="input-file" class="pdv-form-file" type="file" accept="video/*" />
+		</div>
+		<div>
+			<label class="form-label" for="select-dither">Dither</label>
+			<select class="pdv-form-dither" id="select-dither">
+				<option value="threshold">Threshold</option>
+				<option value="bayer2" disabled>Bayer 2&times;2</option>
+				<option value="bayer4" disabled>Bayer 4&times;4</option>
+				<option value="bayer8" disabled>Bayer 8&times;8</option>
+				<option value="blue" disabled>Blue Pattern</option>
+				<option value="floydsteinberg">Floyd-Steinberg</option>
+				<option value="jarvis">Jarvis-Judice-Ninke</option>
+				<option value="stucki">Stucki</option>
+				<option value="atkinson">Atkinson</option>
+				<option value="burkes" selected>Burkes</option>
+				<option value="sierra" disabled>Sierra</option>
+				<option value="tworowsierra" disabled>Two-Row Sierra</option>
+				<option value="sierralite" disabled>Sierra Lite</option>
+			</select>
+		</div>
+		<div>
+			<span class="form-label">Scale to fit</span>
+			<div>
+				<input type="radio" name="scale" value="inside" id="input-scale-inside" />
+				<label for="input-scale-inside">inside</label>
+			</div>
+			<div>
+				<input type="radio" name="scale" value="outside" id="input-scale-outside" checked />
+				<label for="input-scale-outside">outside</label>
+			</div>
+		</div>
+		<div class="form-row">
+			<div>
+				<button class="pdv-form-button button-big" id="download" type="button" class="button">Download</button>
+			</div>
+			<div class="form-message" hidden>
+				<p>Time remaining: <span class="form-message-value"></span></p>
+			</div>
+		</div>
+	</form>
 </div>
-<form method="post">
-	<div>
-		<input class="pdv-form-file" type="file" accept="video/*" />
-	</div>
-	<div>
-		<label for="select-dither">Dither</label>
-		<select class="pdv-form-dither" id="select-dither">
-			<option value="threshold">Threshold</option>
-			<option value="bayer2" disabled>Bayer 2&times;2</option>
-			<option value="bayer4" disabled>Bayer 4&times;4</option>
-			<option value="bayer8" disabled>Bayer 8&times;8</option>
-			<option value="blue" disabled>Blue Pattern</option>
-			<option value="floydsteinberg">Floyd-Steinberg</option>
-			<option value="jarvis">Jarvis-Judice-Ninke</option>
-			<option value="stucki">Stucki</option>
-			<option value="atkinson">Atkinson</option>
-			<option value="burkes" selected>Burkes</option>
-			<option value="sierra" disabled>Sierra</option>
-			<option value="tworowsierra" disabled>Two-Row Sierra</option>
-			<option value="sierralite" disabled>Sierra Lite</option>
-		</select>
-	</div>
-	<div>
-		<span>Scale to fit</span>
-		<div>
-			<input type="radio" name="scale" value="inside" id="input-scale-inside" />
-			<label for="input-scale-inside">inside</label>
-		</div>
-		<div>
-			<input type="radio" name="scale" value="outside" id="input-scale-outside" checked />
-			<label for="input-scale-outside">outside</label>
-		</div>
-	</div>
-	<div class="form-row">
-		<div>
-			<button class="pdv-form-button button-big" id="download" type="button" class="button">Download</button>
-		</div>
-		<div class="form-message" hidden>
-			<p>Time remaining: <span class="form-message-value"></span></p>
-		</div>
-	</div>
-	<textarea id="textarea" style="width:100%; height:10rem;" hidden></textarea>
-</form>

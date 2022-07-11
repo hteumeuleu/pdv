@@ -6,6 +6,10 @@ form > div:not(:last-child) {
 	margin-bottom: rem(8px);
 }
 
+.form-label {
+	font-weight: bold;
+}
+
 .form-row {
 	display: flex;
 	flex-wrap: wrap;
