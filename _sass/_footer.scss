@@ -1,12 +1,37 @@
 .footer {
-	margin-top: rem(48px);
-	border-radius: rem(16px);
-	padding: rem(24px);
+	max-width: rem(448px);
+	margin: rem(48px) auto 0;
 	text-align: center;
-	color: $screen-white;
-	background-color: #212223;
 
 	p:not(:last-child) {
 		margin-bottom: rem(16px);
+	}
+
+	.bubble {
+		position: relative;
+		padding: rem(24px);
+		color: $screen-white;
+		border-radius: rem(16px);
+		background-color: #212223;
+
+		b {
+			color: #eee;
+		}
+
+		&::before {
+			position: absolute;
+			bottom: 100%;
+			left: calc(50% + #{rem(48px)});
+			content: '';
+			width: 0;
+			height: 0;
+			border: rem(8px) solid;
+			border-top-width:rem(6px);
+			border-bottom-width:rem(6px);
+			border-top-color: transparent;
+			border-left-color: transparent;
+			border-bottom-color: #212223;
+			border-right-color: #212223;
+		}
 	}
 }
