@@ -26,7 +26,9 @@ class pdvExport {
 		let filename = 'sample.pdv';
 		const fileInput = document.querySelector('.pdv-form-file')
 		if (fileInput.files.length) {
-			filename = fileInput.files[0].name + '.pdv';
+			filename = fileInput.files[0].name;
+			filename = filename.substring(0, filename.lastIndexOf('.'))
+			filename += '.pdv';
 		}
 		// Get blob URL
 		const blob = this.getBlob();
