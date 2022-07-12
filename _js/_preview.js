@@ -429,6 +429,149 @@ class pdvPreview {
 						data[i + 10 + (this.width * 4)] += errorShare*2;
 					}
 				}
+			} else if(this.filter == "sierra") {
+				// Sierra Dithering
+				//        X   5   3
+				// 2   4  5   4   2
+				//     2  3   2
+				//      (1/32)
+				const errorShare = error / 32;
+				// [x+1][y]
+				if(col < this.width - 1) {
+					data[i + 4] += errorShare*5;
+					data[i + 5] += errorShare*5;
+					data[i + 6] += errorShare*5;
+				}
+				// [x+2][y]
+				if(col < this.width - 2) {
+					data[i + 8] += errorShare*3;
+					data[i + 9] += errorShare*3;
+					data[i + 10] += errorShare*3;
+				}
+				// […][y+1]
+				if(row < this.height - 1) {
+					// [x-2][y+1]
+					if(col >= 2) {
+						data[i - 8 + (this.width * 4)] += errorShare*2;
+						data[i - 7 + (this.width * 4)] += errorShare*2;
+						data[i - 6 + (this.width * 4)] += errorShare*2;
+					}
+					// [x-1][y+1]
+					if(col >= 1) {
+						data[i - 4 + (this.width * 4)] += errorShare*4;
+						data[i - 3 + (this.width * 4)] += errorShare*4;
+						data[i - 2 + (this.width * 4)] += errorShare*4;
+					}
+					// [x][y+1]
+					data[i + (this.width * 4)] += errorShare*5;
+					data[i + (this.width * 4)] += errorShare*5;
+					data[i + (this.width * 4)] += errorShare*5;
+					// [x+1][y]
+					if(col < this.width - 1) {
+						data[i + 4 + (this.width * 4)] += errorShare*4;
+						data[i + 5 + (this.width * 4)] += errorShare*4;
+						data[i + 6 + (this.width * 4)] += errorShare*4;
+					}
+					// [x+2][y]
+					if(col < this.width - 2) {
+						data[i + 8 + (this.width * 4)] += errorShare*2;
+						data[i + 9 + (this.width * 4)] += errorShare*2;
+						data[i + 10 + (this.width * 4)] += errorShare*2;
+					}
+				}
+				// […][y+2]
+				if(row < this.height - 2) {
+					// [x-1][y+2]
+					if(col >= 1) {
+						data[i - 4 + (this.width * 4 * 2)] += errorShare*2;
+						data[i - 3 + (this.width * 4 * 2)] += errorShare*2;
+						data[i - 2 + (this.width * 4 * 2)] += errorShare*2;
+					}
+					// [x][y+2]
+					data[i + (this.width * 4 * 2)] += errorShare*3;
+					data[i + (this.width * 4 * 2)] += errorShare*3;
+					data[i + (this.width * 4 * 2)] += errorShare*3;
+					// [x+1][y+2]
+					if(col < this.width - 1) {
+						data[i + 4 + (this.width * 4 * 2)] += errorShare*2;
+						data[i + 5 + (this.width * 4 * 2)] += errorShare*2;
+						data[i + 6 + (this.width * 4 * 2)] += errorShare*2;
+					}
+				}
+			} else if(this.filter == "tworowsierra") {
+				// Two-Row Sierra Dithering
+				//         X   4   3
+				// 1   2   3   2   1
+				//       (1/16)
+				const errorShare = error / 16;
+				// [x+1][y]
+				if(col < this.width - 1) {
+					data[i + 4] += errorShare*4;
+					data[i + 5] += errorShare*4;
+					data[i + 6] += errorShare*4;
+				}
+				// [x+2][y]
+				if(col < this.width - 2) {
+					data[i + 8] += errorShare*3;
+					data[i + 9] += errorShare*3;
+					data[i + 10] += errorShare*3;
+				}
+				// […][y+1]
+				if(row < this.height - 1) {
+					// [x-2][y+1]
+					if(col >= 2) {
+						data[i - 8 + (this.width * 4)] += errorShare*1;
+						data[i - 7 + (this.width * 4)] += errorShare*1;
+						data[i - 6 + (this.width * 4)] += errorShare*1;
+					}
+					// [x-1][y+1]
+					if(col >= 1) {
+						data[i - 4 + (this.width * 4)] += errorShare*2;
+						data[i - 3 + (this.width * 4)] += errorShare*2;
+						data[i - 2 + (this.width * 4)] += errorShare*2;
+					}
+					// [x][y+1]
+					data[i + (this.width * 4)] += errorShare*3;
+					data[i + (this.width * 4)] += errorShare*3;
+					data[i + (this.width * 4)] += errorShare*3;
+					// [x+1][y]
+					if(col < this.width - 1) {
+						data[i + 4 + (this.width * 4)] += errorShare*2;
+						data[i + 5 + (this.width * 4)] += errorShare*2;
+						data[i + 6 + (this.width * 4)] += errorShare*2;
+					}
+					// [x+2][y]
+					if(col < this.width - 2) {
+						data[i + 8 + (this.width * 4)] += errorShare*1;
+						data[i + 9 + (this.width * 4)] += errorShare*1;
+						data[i + 10 + (this.width * 4)] += errorShare*1;
+					}
+				}
+			} else if(this.filter == "sierralite") {
+				// Sierra Lite Dithering
+				//     X   2
+				// 1   1
+				//   (1/4)
+				const errorShare = error / 4;
+				// [x+1][y]
+				if(col < this.width - 1) {
+					data[i + 4] += errorShare*2;
+					data[i + 5] += errorShare*2;
+					data[i + 6] += errorShare*2;
+				}
+				// […][y+1]
+				if(row < this.height - 1) {
+					// [x-1][y+1]
+					if(col >= 1) {
+						data[i - 4 + (this.width * 4)] += errorShare*1;
+						data[i - 3 + (this.width * 4)] += errorShare*1;
+						data[i - 2 + (this.width * 4)] += errorShare*1;
+					}
+					// [x][y+1]
+					data[i + (this.width * 4)] += errorShare*1;
+					data[i + (this.width * 4)] += errorShare*1;
+					data[i + (this.width * 4)] += errorShare*1;
+				}
 			}
 			// Apply new values
 			newData[i + 0] = newValue;
