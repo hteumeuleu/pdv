@@ -17,5 +17,9 @@ form > div:not(:last-child) {
 }
 
 .form-message {
-	padding: rem(8px);
+	padding: 0 rem(8px);
+}
+
+.form-message-value {
+	font-variant-numeric: tabular-nums;
 }
