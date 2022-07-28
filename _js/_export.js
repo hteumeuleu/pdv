@@ -89,32 +89,48 @@ class pdvExport {
 			if(app && app.preview && app.preview.video) {
 				const that = this || app.export;
 				let video = app.preview.video;
-				video.currentTime = 0;
+				const frames = Math.floor(video.duration * app.fps);
+				let currentFrame = 0;
+				video.currentTime = currentFrame;
+
 				video.removeAttribute('loop');
 				video.removeAttribute('controls');
 				app.form.showMessage();
 				that.button.setAttribute('disabled', 'disabled');
+				video.play()
+				video.pause()
+				video.blur();
 
-				function doSomethingWithTheFrame(now, metadata) {
-					// Push Frame Data
-					const data1bit = that.getFrameArray();
-					const dataZipped = fflate.zlibSync(data1bit);
-					framedata.push(dataZipped);
-					// Push Frame Table
-					let frameType = 1;
-					frametable.push((frameDataOffset << 2) + frameType);
-					// Increase offset for next frame
-					const dataLength = dataZipped.byteLength;
-					frameDataOffset += dataLength;
-					// Update message
-					let timeRemaining = Math.round(video.duration - video.currentTime);
-					app.form.updateMessage(timeRemaining + "s");
-					// Re-register the callback to be notified about the next frame.
-					video.requestVideoFrameCallback(doSomethingWithTheFrame);
+				function doSomethingWithTheFrame() {
+					if(video.readyState > 1) {
+						video.currentTime = currentFrame * (1 / app.fps);
+						app.preview.computeFrame();
+						// Push Frame Data
+						const data1bit = that.getFrameArray();
+						const dataZipped = fflate.zlibSync(data1bit);
+						framedata.push(dataZipped);
+						// Push Frame Table
+						let frameType = 1;
+						frametable.push((frameDataOffset << 2) + frameType);
+						// Increase offset for next frame
+						const dataLength = dataZipped.byteLength;
+						frameDataOffset += dataLength;
+						// Update message
+						app.form.updateMessage(currentFrame + "/" + frames);
+						// Re-register the callback to be notified about the next frame.
+						if(currentFrame < frames) {
+							// Update current frame
+							currentFrame++;
+							window.requestAnimationFrame(doSomethingWithTheFrame)
+						} else {
+							window.requestAnimationFrame(doEndOfFile)
+						}
+					} else {
+						window.requestAnimationFrame(doSomethingWithTheFrame)
+					}
 				}
-				video.requestVideoFrameCallback(doSomethingWithTheFrame);
 
-				video.addEventListener('ended', e => {
+				function doEndOfFile() {
 					// Offset to end of file in Frame Table
 					frametable.push(frameDataOffset << 2);
 
@@ -139,10 +155,9 @@ class pdvExport {
 					video.setAttribute('controls', 'controls');
 					app.form.hideMessage();
 					that.button.removeAttribute('disabled');
-				});
+				}
+				window.requestAnimationFrame(doSomethingWithTheFrame)
 
-				video.play();
-				video.blur();
 			} else {
 				reject(Error('Object [video] is undefined.'))
 			}
