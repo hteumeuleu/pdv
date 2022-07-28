@@ -4,6 +4,13 @@
 	padding: rem(16px);
 }
 
+.main {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	min-height: calc(100vh - 9rem);
+}
+
 @media only screen and (min-width:rem(1024px)) {
 	.app {
 		display: flex;
@@ -16,6 +23,10 @@
 
 		.form {
 			padding: rem(24px);
+		}
+
+		.screen {
+			margin-bottom: 0;
 		}
 	}
 }
