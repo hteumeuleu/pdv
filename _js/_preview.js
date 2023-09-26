@@ -16,6 +16,7 @@ class pdvPreview {
 			this.addEvents();
 			this.setDither();
 		}
+
 	}
 
 	addEvents() {
