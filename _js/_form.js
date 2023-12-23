@@ -20,6 +20,12 @@ class pdvForm {
 		radioScaleOutside.addEventListener('change', e => {
 			this.triggerFormScaleChangeEvent(e);
 		});
+		
+		// Threshold value
+		const thresholdInput = document.querySelector('input[name="threshold"]')
+		thresholdInput.addEventListener('change', e => {
+			this.triggerFormThresholdChangeEvent(e);
+		});
 
 		// File input
 		const fileInput = document.querySelector('form input[type="file"]')
@@ -49,6 +55,13 @@ class pdvForm {
 
 	triggerFormScaleChangeEvent(evt) {
 		document.dispatchEvent(new CustomEvent('pdvFormScaleChange', {
+			bubbles: true,
+			detail: evt.target.value
+		}));
+	}
+
+	triggerFormThresholdChangeEvent(evt) {
+		document.dispatchEvent(new CustomEvent('pdvFormThresholdChange', {
 			bubbles: true,
 			detail: evt.target.value
 		}));

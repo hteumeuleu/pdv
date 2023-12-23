@@ -29,6 +29,11 @@ layout: default
 				<option value="sierralite">Sierra Lite</option>
 			</select>
 		</div>
+		<div style="width:500px;">
+			<label for="input-threshold">Threshold Value: </label>
+			<input type="range" id="input-threshold" name="threshold" value="127" min="0" max="255" oninput="this.nextElementSibling.value = this.value">
+			<output for="input-threshold">127</output>
+		</div>
 		<div>
 			<span class="form-label">Scale to fit</span>
 			<div>

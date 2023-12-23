@@ -45,6 +45,10 @@ class pdvPreview {
 			this.setScale(e.detail);
 		});
 
+		document.addEventListener('pdvFormThresholdChange', e => {
+			this.setThreshold(e.detail);
+		});
+
 		document.addEventListener('pdvFormVideoChange', () => {
 			this.setVideo();
 		});
@@ -138,6 +142,10 @@ class pdvPreview {
 			this.scale = "outside";
 			this.video.style.objectFit = "cover";
 		}
+	}
+
+	setThreshold(value) {
+		this.filterThreshold = value;
 	}
 
 	setVideo() {
